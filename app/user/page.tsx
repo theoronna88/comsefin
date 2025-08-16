@@ -1,11 +1,33 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import LoadingPage from "../_components/loading";
 
 const UserPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchRedisData = async () => {
+      try {
+        // Buscar dados do Redis através de uma API route
+        const response = await fetch("/api/get-redis-data");
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Dados do Redis:", data);
+        } else {
+          console.log("Erro ao buscar dados do Redis:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Erro ao conectar com a API:", error);
+      }
+    };
+
+    if (session) {
+      fetchRedisData();
+    }
+  }, [session]);
 
   if (status === "loading") {
     return <LoadingPage />;
