@@ -25,6 +25,7 @@ const UserPage = () => {
     };
 
     if (session) {
+      console.log("Session data USER:", session);
       fetchRedisData();
     }
   }, [session]);

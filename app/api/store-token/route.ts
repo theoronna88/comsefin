@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   cookies().set("session_id", sessionId, {
     httpOnly: true,
     secure: true,
-    path: "/user",
+    path: "/",
     maxAge: 1200, // 20 minutos em segundos
   });
 

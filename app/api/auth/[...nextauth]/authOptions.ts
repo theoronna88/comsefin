@@ -4,6 +4,7 @@ import { Session } from "next-auth";
 import { User } from "next-auth";
 import { prisma } from "@/app/_lib/prisma";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 
 declare module "next-auth" {
   interface Session {
@@ -48,6 +49,11 @@ export const authOptions = {
         },
       },
       async authorize(credentials) {
+        const tokenContaAzul = cookies().get("tokenContaAzul")?.value;
+        if (!tokenContaAzul) {
+          console.log("Token ContaAzul não encontrado no cookie");
+          throw new Error("Token ContaAzul não encontrado no cookie");
+        }
         if (!credentials?.username || !credentials?.password) {
           throw new Error("Username e senha são obrigatórios");
         }
@@ -104,7 +110,7 @@ export const authOptions = {
     },
   },
   pages: {
-    signIn: "/login",
+    signIn: "/",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

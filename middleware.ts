@@ -12,6 +12,6 @@ export default withAuth({
 export const config = {
   matcher: [
     "/user/:path*", // Protege apenas as rotas que começam com /user
-    "/conta-azul",
+    // "/conta-azul",
   ],
 };

@@ -3,10 +3,12 @@ import redis from "@/app/_lib/redis";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  console.log("GET /api/get-redis-data called");
   try {
     // Obter o sessionId do cookie
     const cookieStore = cookies();
     const sessionId = cookieStore.get("session_id")?.value;
+    console.log("Session ID from cookie:", sessionId);
 
     if (!sessionId) {
       return NextResponse.json(
@@ -17,7 +19,7 @@ export async function GET() {
 
     // Buscar o token no Redis usando o sessionId
     const accessToken = await redis.get(`session:${sessionId}`);
-
+    console.log("Access Token from Redis:", accessToken);
     if (!accessToken) {
       return NextResponse.json(
         { error: "Token não encontrado no Redis" },
@@ -27,9 +29,10 @@ export async function GET() {
 
     // Buscar todas as chaves do Redis para debug (opcional)
     const allKeys = await redis.keys("session:*");
+    console.log("All session keys in Redis:", allKeys);
 
     // Retornar os dados
-    return NextResponse.json({
+    https: return NextResponse.json({
       sessionId,
       accessToken,
       allSessionKeys: allKeys,

@@ -11,6 +11,7 @@ export function SiteHeader() {
   const { data: session } = useSession();
 
   const pageTitles: Record<string, string> = {
+    "/user": "Dashboard",
     "/user/dashboard": "Dashboard",
     "/user/centro-custo": "Centro de Custo",
     "/user/categorias": "Categorias",
