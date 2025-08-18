@@ -1,25 +1,19 @@
-import { cookies } from "next/headers";
 import redis from "@/app/_lib/redis";
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 
 export async function GET() {
-  console.log("GET /api/get-redis-data called");
   try {
-    // Obter o sessionId do cookie
-    const cookieStore = cookies();
-    const sessionId = cookieStore.get("session_id")?.value;
-    console.log("Session ID from cookie:", sessionId);
-
+    const session = await getServerSession(authOptions);
+    const sessionId = session?.user?.id;
     if (!sessionId) {
       return NextResponse.json(
         { error: "Session ID não encontrado" },
         { status: 400 }
       );
     }
-
-    // Buscar o token no Redis usando o sessionId
     const accessToken = await redis.get(`session:${sessionId}`);
-    console.log("Access Token from Redis:", accessToken);
     if (!accessToken) {
       return NextResponse.json(
         { error: "Token não encontrado no Redis" },
@@ -27,11 +21,7 @@ export async function GET() {
       );
     }
 
-    // Buscar todas as chaves do Redis para debug (opcional)
     const allKeys = await redis.keys("session:*");
-    console.log("All session keys in Redis:", allKeys);
-
-    // Retornar os dados
     https: return NextResponse.json({
       sessionId,
       accessToken,
@@ -39,9 +29,8 @@ export async function GET() {
       message: "Dados recuperados com sucesso do Redis",
     });
   } catch (error) {
-    console.error("Erro ao acessar Redis:", error);
     return NextResponse.json(
-      { error: "Erro interno do servidor" },
+      { error: "Erro interno do servidor ", with: error },
       { status: 500 }
     );
   }

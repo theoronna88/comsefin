@@ -17,7 +17,7 @@ import { Button } from "./ui/button";
 
 import { signIn, getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const LoginPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -30,6 +30,17 @@ const LoginPage = () => {
     password: z.string().min(1, "Senha é obrigatória"),
   });
 
+  useEffect(() => {
+    const access_token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("tokenContaAzul="))
+      ?.split("=")[1];
+    if (!access_token) {
+      setError("Faça login novamente com a Conta Azul primeiro.");
+      router.push("/");
+    }
+  }, [router]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,7 +50,6 @@ const LoginPage = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data);
     try {
       const res = await signIn("credentials", {
         username: data.username,

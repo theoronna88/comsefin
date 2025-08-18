@@ -11,21 +11,13 @@ const UserPage = () => {
   useEffect(() => {
     const fetchRedisData = async () => {
       try {
-        // Buscar dados do Redis através de uma API route
-        const response = await fetch("/api/get-redis-data");
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Dados do Redis:", data);
-        } else {
-          console.log("Erro ao buscar dados do Redis:", response.statusText);
-        }
+        await fetch("/api/get-redis-data");
       } catch (error) {
         console.error("Erro ao conectar com a API:", error);
       }
     };
 
     if (session) {
-      console.log("Session data USER:", session);
       fetchRedisData();
     }
   }, [session]);

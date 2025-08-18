@@ -22,6 +22,8 @@ export function LogoutButton({
   className,
 }: LogoutButtonProps) {
   const handleLogout = async () => {
+    document.cookie =
+      "TokenContaAzul=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     await signOut({
       callbackUrl: "/login",
       redirect: true,

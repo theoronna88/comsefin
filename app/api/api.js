@@ -36,16 +36,13 @@ export async function getToken(authorizationCode) {
     body: params.toString(),
   });
 
-  const resultText = await response.text(); // usar para debugging
-  console.log("Resposta bruta da API de token:", resultText);
+  const resultText = await response.text();
 
   if (!response.ok) {
     throw new Error(
       `Token request failed: ${response.status} - ${response.statusText}`
     );
   }
-
-  console.log("Response: ", response);
 
   return JSON.parse(resultText);
 }
@@ -121,7 +118,6 @@ export async function getCategorias(busca) {
       permite_apenas_filhos: "false",
     }).toString();
   }
-  console.log("Query Params:", query);
 
   const sessionId = cookies().get("sessionId")?.value;
   if (!sessionId) {
@@ -169,7 +165,6 @@ export async function getDespesas(
   }
 
   const query = new URLSearchParams(queryParams).toString();
-  console.log("Query Params:", query);
 
   const sessionId = cookies().get("sessionId")?.value;
   if (!sessionId) {
@@ -179,7 +174,7 @@ export async function getDespesas(
 
   if (!accessToken) {
     console.error("Token de acesso não encontrado no Redis.");
-    redirect("http://localhost:3000");
+    redirect({ url: process.env.NEXT_REDIRECT_URI || "http://localhost:3000" });
   }
 
   const response = await fetch(
@@ -216,7 +211,6 @@ export async function getReceitas(
     queryParams.ids_centros_de_custo = centrosDeCusto;
   }
   const query = new URLSearchParams(queryParams).toString();
-  console.log("Query Params:", query);
 
   const sessionId = cookies().get("sessionId")?.value;
   if (!sessionId) {
@@ -226,7 +220,7 @@ export async function getReceitas(
 
   if (!accessToken) {
     console.error("Token de acesso não encontrado no Redis.");
-    redirect("http://localhost:3000");
+    redirect({ url: process.env.NEXT_REDIRECT_URI || "http://localhost:3000" });
   }
 
   const response = await fetch(

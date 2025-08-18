@@ -31,7 +31,7 @@ const CallbackContent = () => {
 
         // document.cookie = `sessionId=${sessionId}; path=/`;
         document.cookie = `tokenContaAzul=${token.access_token}; path=/`;
-        router.push("/");
+        router.push("/login");
       } else {
         console.error("Código ou estado ausente na URL.");
       }

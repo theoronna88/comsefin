@@ -5,6 +5,7 @@ import { User } from "next-auth";
 import { prisma } from "@/app/_lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { storeRedisToken } from "@/app/_lib/store-token";
 
 declare module "next-auth" {
   interface Session {
@@ -51,11 +52,10 @@ export const authOptions = {
       async authorize(credentials) {
         const tokenContaAzul = cookies().get("tokenContaAzul")?.value;
         if (!tokenContaAzul) {
-          console.log("Token ContaAzul não encontrado no cookie");
           throw new Error("Token ContaAzul não encontrado no cookie");
         }
         if (!credentials?.username || !credentials?.password) {
-          throw new Error("Username e senha são obrigatórios");
+          throw new Error("Usuário e senha são obrigatórios");
         }
 
         try {
@@ -106,11 +106,23 @@ export const authOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
       }
+      const access_token = cookies().get("tokenContaAzul")?.value;
+      storeRedisToken({
+        sessionId: session.user.id,
+        accessToken: access_token!,
+      });
+      /* await fetch(`${process.env.NEXTAUTH_URL}/api/store-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ access_token, sessionId: session.user.id }),
+      }); */
       return session;
     },
   },
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
