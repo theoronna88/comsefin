@@ -17,19 +17,6 @@ const CallbackContent = () => {
       if (code && state) {
         const token = await getToken(code);
 
-        // const sessionId = session.user.id; // Usando o ID do usuário como sessionId
-
-        /*
-        await fetch("/api/store-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ access_token: token.access_token, sessionId }),
-        });
-        */
-
-        // document.cookie = `sessionId=${sessionId}; path=/`;
         document.cookie = `tokenContaAzul=${token.access_token}; path=/`;
         router.push("/login");
       } else {

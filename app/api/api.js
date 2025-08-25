@@ -1,7 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import redis from "../_lib/redis";
+// import redis from "../_lib/redis";
 
 export async function getApiUrl() {
   const params = new URLSearchParams({
@@ -47,19 +47,16 @@ export async function getToken(authorizationCode) {
   return JSON.parse(resultText);
 }
 
-export async function getCentroCusto(sessionId) {
+export async function getCentroCusto() {
   const query = new URLSearchParams({
     pagina: "1",
     tamanho_pagina: "50",
   }).toString();
 
-  if (!sessionId) {
-    throw new Error("Session não encontrado nos cookies.");
-  }
-  const accessToken = await redis.get(`session:${sessionId}`);
+  const accessToken = cookies().get("tokenContaAzul")?.value;
 
   if (!accessToken) {
-    throw new Error("Token de acesso não encontrado no Redis.");
+    throw new Error("Token de acesso não encontrado nos cookies.");
   }
 
   const response = await fetch(
@@ -83,13 +80,9 @@ export async function getPessoa() {
     tamanho_pagina: "1000",
   }).toString();
 
-  const sessionId = cookies().get("sessionId")?.value;
-  if (!sessionId) {
-    throw new Error("Session não encontrado nos cookies.");
-  }
-  const accessToken = await redis.get(`session:${sessionId}`);
+  const accessToken = cookies().get("tokenContaAzul")?.value;
   if (!accessToken) {
-    throw new Error("Token de acesso não encontrado no Redis.");
+    throw new Error("Token de acesso não encontrado nos cookies.");
   }
   const response = await fetch(`${process.env.NEXT_API_URL}/pessoa?${params}`, {
     method: "GET",
@@ -118,14 +111,10 @@ export async function getCategorias(busca) {
     }).toString();
   }
 
-  const sessionId = cookies().get("sessionId")?.value;
-  if (!sessionId) {
-    throw new Error("Session não encontrado nos cookies.");
-  }
-  const accessToken = await redis.get(`session:${sessionId}`);
+  const accessToken = cookies().get("tokenContaAzul")?.value;
 
   if (!accessToken) {
-    throw new Error("Token de acesso não encontrado no Redis.");
+    throw new Error("Token de acesso não encontrado nos cookies.");
   }
 
   const response = await fetch(
@@ -165,14 +154,10 @@ export async function getDespesas(
 
   const query = new URLSearchParams(queryParams).toString();
 
-  const sessionId = cookies().get("sessionId")?.value;
-  if (!sessionId) {
-    throw new Error("Session não encontrado nos cookies.");
-  }
-  const accessToken = await redis.get(`session:${sessionId}`);
+  const accessToken = cookies().get("tokenContaAzul")?.value;
 
   if (!accessToken) {
-    console.error("Token de acesso não encontrado no Redis.");
+    console.error("Token de acesso não encontrado nos cookies.");
     redirect({ url: process.env.NEXT_REDIRECT_URI || "http://localhost:3000" });
   }
 
@@ -211,14 +196,10 @@ export async function getReceitas(
   }
   const query = new URLSearchParams(queryParams).toString();
 
-  const sessionId = cookies().get("sessionId")?.value;
-  if (!sessionId) {
-    throw new Error("Session não encontrado nos cookies.");
-  }
-  const accessToken = await redis.get(`session:${sessionId}`);
+  const accessToken = cookies().get("tokenContaAzul")?.value;
 
   if (!accessToken) {
-    console.error("Token de acesso não encontrado no Redis.");
+    console.error("Token de acesso não encontrado nos cookies.");
     redirect({ url: process.env.NEXT_REDIRECT_URI || "http://localhost:3000" });
   }
 

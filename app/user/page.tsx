@@ -28,6 +28,8 @@ const UserPage = () => {
 
   if (!session) {
     router.push("/");
+  } else if (session) {
+    router.push("/user/dashboard");
   }
 
   return (

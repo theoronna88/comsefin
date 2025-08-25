@@ -111,13 +111,7 @@ export const authOptions = {
         sessionId: session.user.id,
         accessToken: access_token!,
       });
-      /* await fetch(`${process.env.NEXTAUTH_URL}/api/store-token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ access_token, sessionId: session.user.id }),
-      }); */
+
       return session;
     },
   },
