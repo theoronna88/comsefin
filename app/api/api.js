@@ -47,13 +47,12 @@ export async function getToken(authorizationCode) {
   return JSON.parse(resultText);
 }
 
-export async function getCentroCusto() {
+export async function getCentroCusto(sessionId) {
   const query = new URLSearchParams({
     pagina: "1",
     tamanho_pagina: "50",
   }).toString();
 
-  const sessionId = cookies().get("sessionId")?.value;
   if (!sessionId) {
     throw new Error("Session não encontrado nos cookies.");
   }
