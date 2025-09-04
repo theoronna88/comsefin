@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartConfig } from "@/components/ui/chart";
+import { ChartConfig } from "@/app/_components/ui/chart";
 import MultiBarChart from "./multibar-chart";
 
 const chartConfig = {
@@ -83,8 +83,8 @@ const YearVsYear = ({ centrosDeCusto, searching, year }: YearVsYearProps) => {
     })
     .filter((item) => item.atual !== 0 && item.anterior !== 0);
 
-  // console.log("chartDataAtual: ", chartDataAtual);
-  // console.log("centrosDeCusto: ", centrosDeCusto);
+  console.log("chartDataAtual: ", chartDataAtual);
+  console.log("centrosDeCusto: ", centrosDeCusto);
 
   return (
     <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-3 @5xl/main:grid-cols-4 grid grid-cols-2 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">

@@ -21,7 +21,9 @@ import {
 import { Button } from "@/app/_components/ui/button";
 import YearVsYear from "@/app/_components/graphs/year-vs-year";
 import { ChartAreaInteractive } from "@/app/_components/graphs/chart-area-interactive";
-import { SectionCards } from "@/app/_components/section-cards";
+import { TotalPieExercicio } from "@/app/_components/total-pie";
+import { Separator } from "@/app/_components/ui/separator";
+import { Switch } from "@/app/_components/ui/switch";
 
 export default function Page() {
   interface Categoria {
@@ -55,6 +57,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
+  const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
 
   useEffect(() => {
     // Get session ID from NextAuth cookie
@@ -223,24 +226,47 @@ export default function Page() {
               <SearchIcon />
               Buscar
             </Button>
+            <div className="flex items-center gap-2 justify-center">
+              <div className="flex items-center space-x-2">
+                <Label>Receita</Label>
+                <Switch
+                  checked={switchReceitaDespesa}
+                  onCheckedChange={(checked) =>
+                    setSwitchReceitaDespesa(checked)
+                  }
+                />
+                <Label>Despesa</Label>
+              </div>
+            </div>
           </div>
 
-          <SectionCards
-            centrosDeCusto={centrosDeCusto}
-            searching={searching}
-            year={year}
-          />
+          <Separator />
 
-          <YearVsYear
-            centrosDeCusto={centrosDeCusto}
-            searching={searching}
-            year={year}
-          />
+          {switchReceitaDespesa ? (
+            <>
+              <Label className="px-6 text-lg font-bold">Despesa</Label>
+            </>
+          ) : (
+            <>
+              <Label className="px-6 text-lg font-bold">Receitas</Label>
+              <TotalPieExercicio
+                centrosDeCusto={centrosDeCusto}
+                searching={searching}
+                year={year}
+                title="Total de Receita Exercício"
+              />
 
-          <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
-          </div>
-          <DataTable data={data} />
+              <YearVsYear
+                centrosDeCusto={centrosDeCusto}
+                searching={searching}
+                year={year}
+              />
+              <div className="px-4 lg:px-6">
+                <ChartAreaInteractive />
+              </div>
+              <DataTable data={data} />
+            </>
+          )}
         </div>
       </div>
     </div>

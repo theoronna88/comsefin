@@ -1,6 +1,6 @@
 import PieChartCard from "./graphs/pie-chart";
 
-interface SectionCardsProps {
+interface TotalPieExercicioProps {
   centrosDeCusto: Array<{
     id: number;
     codigo: string;
@@ -16,13 +16,15 @@ interface SectionCardsProps {
   }>;
   searching: boolean;
   year: string;
+  title?: string;
 }
 
-export function SectionCards({
+export function TotalPieExercicio({
   centrosDeCusto,
   searching,
   year,
-}: SectionCardsProps) {
+  title,
+}: TotalPieExercicioProps) {
   const colors = [
     "#2563eb", // azul
     "#10b981", // verde
@@ -57,7 +59,7 @@ export function SectionCards({
       <PieChartCard
         searching={searching}
         chartConfig={chartConfig}
-        title={`Total de Receita Exercício ${year}`}
+        title={`${title} ${year}`}
       />
     </div>
   );
