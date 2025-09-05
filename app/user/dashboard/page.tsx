@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { DataTable } from "@/app/_components/data-table";
+// import { DataTable } from "@/app/_components/data-table";
 
-import data from "./data.json";
+// import data from "./data.json";
 import { SearchIcon } from "lucide-react";
 import {
   getCategorias,
@@ -58,6 +58,8 @@ export default function Page() {
   const [searching, setSearching] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
+  const [receitas12months, setReceitas12Months] = useState([]);
+  const [despesas12months, setDespesas12Months] = useState([]);
 
   useEffect(() => {
     // Get session ID from NextAuth cookie
@@ -114,6 +116,24 @@ export default function Page() {
       console.log("Selecione o ano primeiro.");
       return;
     }
+
+    const receitas12MonthsTemp = await getReceitas(inicioStr, terminoStr)
+      .then((res) => res.itens)
+      .catch((error) => {
+        console.error("Erro ao buscar receitas 12 meses:", error);
+        return [];
+      });
+    console.log("receitas12months: ", receitas12MonthsTemp);
+    setReceitas12Months(receitas12MonthsTemp);
+
+    const despesas12MonthsTemp = await getDespesas(inicioStr, terminoStr)
+      .then((res) => res.itens)
+      .catch((error) => {
+        console.error("Erro ao buscar despesas 12 meses:", error);
+        return [];
+      });
+    console.log("despesas12months: ", despesas12MonthsTemp);
+    setDespesas12Months(despesas12MonthsTemp);
 
     // Primeiro, atualizar as categorias de cada centro de custo
     const updatedCentros = [...centrosDeCusto];
@@ -260,11 +280,15 @@ export default function Page() {
                 centrosDeCusto={centrosDeCusto}
                 searching={searching}
                 year={year}
+                title="Receitas"
               />
               <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
+                <ChartAreaInteractive
+                  values={receitas12months}
+                  title="Receitas"
+                />
               </div>
-              <DataTable data={data} />
+              {/*<DataTable data={data} />*/}
             </>
           )}
         </div>

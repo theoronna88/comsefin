@@ -3,6 +3,8 @@ import LoadingComsefaz from "@/app/_components/comsefaz-loading";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/app/_components/ui/chart";
@@ -28,9 +30,9 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
   }));
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col w-3/4 mx-auto">
       <CardContent className="flex-1 pb-0">
-        <h3 className="text-lg font-semibold text-center my-6 text-blue-900">
+        <h3 className="text-lg font-semibold text-center my-6 text-primary">
           {title || " "}
         </h3>
         {searching ? (
@@ -51,12 +53,30 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
                   cy="50%"
                   outerRadius="100%"
                   isAnimationActive={false}
-                  label // <- habilita os labels padrão
+                  label={({ percent, x, y }) => (
+                    <text
+                      x={x}
+                      y={y}
+                      fill="blue"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize={14}
+                      fontWeight="bold"
+                      pointerEvents="none"
+                      dy={-10}
+                    >
+                      {`${(percent * 100).toFixed(0)}%`}
+                    </text>
+                  )}
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} />
                   ))}
                 </Pie>
+                <ChartLegend
+                  content={<ChartLegendContent nameKey="label" />}
+                  className="flex justify-center gap-8"
+                />
               </PieChart>
             </ResponsiveContainer>
           </ChartContainer>

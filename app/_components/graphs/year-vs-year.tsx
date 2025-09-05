@@ -36,9 +36,16 @@ interface YearVsYearProps {
   }>;
   searching: boolean;
   year: string;
+  title?: string;
 }
 
-const YearVsYear = ({ centrosDeCusto, searching, year }: YearVsYearProps) => {
+const YearVsYear = ({
+  centrosDeCusto,
+  searching,
+  year,
+  title,
+}: YearVsYearProps) => {
+  console.log("YearVsYear - centrosDeCusto: ", centrosDeCusto);
   const chartDataAtual = centrosDeCusto
     .map((centro) => {
       const totalAtual = centro.categorias?.reduce((soma, categoria) => {
@@ -87,7 +94,7 @@ const YearVsYear = ({ centrosDeCusto, searching, year }: YearVsYearProps) => {
   console.log("centrosDeCusto: ", centrosDeCusto);
 
   return (
-    <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-3 @5xl/main:grid-cols-4 grid grid-cols-2 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
+    <div className="w-3/4 mx-auto">
       <MultiBarChart
         chartData={chartReceitaData}
         chartConfig={chartConfig}
@@ -96,11 +103,11 @@ const YearVsYear = ({ centrosDeCusto, searching, year }: YearVsYearProps) => {
         searching={searching}
         title={
           year !== ""
-            ? `Receitas ${year} x ${Number(year) - 1}`
-            : "Receitas Ano x Ano"
+            ? `${title} ${year} x ${Number(year) - 1}`
+            : `${title} Ano x Ano`
         }
       />
-
+      {/*}
       <MultiBarChart
         chartData={chartDataAtual}
         chartConfig={chartConfig}
@@ -112,7 +119,7 @@ const YearVsYear = ({ centrosDeCusto, searching, year }: YearVsYearProps) => {
             ? `Despesas ${year} x ${Number(year) - 1}`
             : "Despesas Ano x Ano"
         }
-      />
+      /> */}
     </div>
   );
 };
