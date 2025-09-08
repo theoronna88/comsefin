@@ -67,7 +67,7 @@ const LoginPage = () => {
         // Verificar se a sessão foi criada corretamente
         const session = await getSession();
         if (session) {
-          router.push("/user");
+          router.push("/user/dashboard");
           // router.refresh();
         } else {
           setError("Erro ao criar sessão. Tente novamente.");

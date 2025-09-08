@@ -1,7 +1,8 @@
 "use client";
-import FormBudget from "@/app/_components/form-budget";
-import { getCategorias } from "@/app/api/api";
+import { getBudget, getCategorias } from "@/app/api/api";
 import { useEffect, useState } from "react";
+import DataTable from "./data-table";
+import { columns } from "./columns";
 
 interface Categoria {
   id: number;
@@ -10,8 +11,22 @@ interface Categoria {
   categoria_pai: string | null;
 }
 
+interface Budget {
+  ano: number;
+  id: string;
+  valores: {
+    item: {
+      id: number;
+      descricao: string;
+      codigo: string;
+    };
+    valor: number;
+  };
+}
+
 const Budget = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -27,12 +42,31 @@ const Budget = () => {
         });
     };
 
-    fetchCategorias();
-  }, []);
+    if (categorias.length === 0) {
+      fetchCategorias();
+    }
+
+    const fetchBudget = async () => {
+      getBudget()
+        .then((data) => {
+          console.log("Budget data:", data);
+          setBudgets(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching budget:", error);
+        });
+    };
+
+    if (budgets.length === 0) {
+      fetchBudget();
+    }
+  }, [budgets.length, categorias.length]);
 
   return (
     <>
-      <FormBudget categorias={categorias} />
+      <div className="flex flex-col gap-4 p-8">
+        <DataTable columns={columns} data={budgets} categorias={categorias} />
+      </div>
     </>
   );
 };

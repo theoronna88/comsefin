@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -11,6 +11,10 @@ import {
   SelectValue,
 } from "./ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
+import { saveBudget } from "../api/api";
+import Budget from "../user/budget/page";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Categoria {
   id: number;
@@ -19,8 +23,18 @@ interface Categoria {
   categoria_pai: string | null;
 }
 
-const FormBudget = ({ categorias }: { categorias: Categoria[] }) => {
-  const [formData, setFormData] = useState({});
+const FormBudget = ({
+  categorias,
+  budget,
+  onClose,
+}: {
+  categorias: Categoria[];
+  budget: Budget;
+  onClose: () => void;
+}) => {
+  const [formData, setFormData] = useState<{ [key: string]: string }>({});
+  const [firstPass, setFirstPass] = useState(true);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,8 +43,49 @@ const FormBudget = ({ categorias }: { categorias: Categoria[] }) => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const data = {
+      id: budget?.id,
+      ano: formData?.ano,
+      categorias: Object.entries(formData)
+        .filter(([key]) => key !== "ano")
+        .map(([nome, valor]) => ({
+          nome,
+          valor: Number(valor.replace(",", ".")),
+        })),
+    };
+    console.log("data: ", data);
     console.log(formData);
+    saveBudget(data)
+      .then((response) => {
+        console.log("Budget saved successfully:", response);
+        toast.success("Orçamento salvo com sucesso!");
+        setFormData({});
+        window.location.href = "/user/budget";
+
+        onClose();
+      })
+      .catch((error) => {
+        console.error("Error saving budget:", error);
+        toast.error("Erro ao salvar o orçamento. ", {
+          description: error.message,
+        });
+      });
   };
+
+  useEffect(() => {
+    if (budget && firstPass) {
+      // Preencher o formData com os valores do orçamento existente
+      const existingData: { [key: string]: string } = {
+        ano: budget.ano.toString(),
+      };
+      budget.valores.forEach((valor) => {
+        existingData[valor.item.descricao] = valor.valor.toString();
+      });
+      setFormData(existingData);
+      setFirstPass(false);
+    }
+  }, [budget, firstPass]);
 
   return (
     <>
@@ -40,6 +95,7 @@ const FormBudget = ({ categorias }: { categorias: Categoria[] }) => {
           <Select
             name="ano"
             onValueChange={(value) => setFormData({ ...formData, ano: value })}
+            value={`${formData.ano}`}
           >
             <SelectTrigger className="border-2 border-gray-200 rounded-md p-1 w-[180px]">
               <SelectValue placeholder="Selecione o Ano" />
@@ -62,10 +118,11 @@ const FormBudget = ({ categorias }: { categorias: Categoria[] }) => {
             <div key={categoria.id}>
               <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
               <Input
-                type="number"
+                type="text"
                 name={categoria.nome}
                 placeholder={categoria.nome}
                 onChange={handleChange}
+                value={formData[categoria.nome] || ""}
               />
             </div>
           ))}
