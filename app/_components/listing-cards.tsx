@@ -10,6 +10,7 @@ type ListingCardsProps = {
 };
 
 const ListingCards = ({ data }: ListingCardsProps) => {
+  console.log("Dados recebidos em ListingCards:", data);
   return (
     <>
       {data.length === 0 ? (

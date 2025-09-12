@@ -342,6 +342,18 @@ export async function getBudget() {
   return budgets;
 }
 
+export async function getBudgetByYear(year) {
+  console.log("getBudgetByYear - year:", year);
+  const budget = await prisma.orcamentos.findFirst({
+    where: { ano: Number(year) },
+    include: {
+      valores: { include: { item: true } },
+    },
+  });
+  console.log("getBudgetByYear - return: ", budget);
+  return budget;
+}
+
 export async function deleteBudget(id) {
   try {
     //Deleta os valores do orçamento

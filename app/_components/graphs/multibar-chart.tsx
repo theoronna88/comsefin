@@ -40,6 +40,7 @@ const MultiBarChart = ({
   searching,
   title,
 }: MultiBarChartProps) => {
+  // console.log("MultiBarChart - chartData: ", chartData);
   return (
     <>
       <Card>

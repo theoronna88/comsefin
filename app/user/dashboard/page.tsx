@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 // import data from "./data.json";
 import { SearchIcon } from "lucide-react";
 import {
+  getBudgetByYear,
   getCategorias,
   getCentroCusto,
   getDespesas,
@@ -19,11 +20,11 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { Button } from "@/app/_components/ui/button";
-import YearVsYear from "@/app/_components/graphs/year-vs-year";
-import { ChartAreaInteractive } from "@/app/_components/graphs/chart-area-interactive";
-import { TotalPieExercicio } from "@/app/_components/total-pie";
 import { Separator } from "@/app/_components/ui/separator";
 import { Switch } from "@/app/_components/ui/switch";
+import ReceitasContainer from "@/app/_components/receitas-container";
+import DespesasContainer from "@/app/_components/despesas-container";
+import { toast } from "sonner";
 
 export default function Page() {
   interface Categoria {
@@ -37,6 +38,7 @@ export default function Page() {
     receitasPrev?: [];
     totalReceitas?: number;
     totalReceitasPrev?: number;
+    orcamentoAtual?: number;
   }
 
   interface CentroCusto {
@@ -49,6 +51,7 @@ export default function Page() {
   interface Despesa {
     id: number;
     total: number;
+    status_traduzido: string;
   }
 
   const [year, setYear] = useState<string>("");
@@ -59,7 +62,8 @@ export default function Page() {
   const [sessionId, setSessionId] = useState<string>("");
   const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
   const [receitas12months, setReceitas12Months] = useState([]);
-  const [despesas12months, setDespesas12Months] = useState([]);
+  const [despesas12months, setDespesas12Months] = useState<any[]>([]);
+  const [orcamentoSelectedYear, setOrcamentoSelectedYear] = useState<any[]>([]);
 
   useEffect(() => {
     // Get session ID from NextAuth cookie
@@ -75,7 +79,7 @@ export default function Page() {
 
   useEffect(() => {
     const fetchCentrosDeCusto = async () => {
-      console.log("Session ID:", sessionId);
+      // console.log("Session ID:", sessionId);
       try {
         const res = await getCentroCusto();
         setCentrosDeCusto(res.itens);
@@ -102,18 +106,18 @@ export default function Page() {
 
   async function handleOnClick() {
     setSearching(true);
+
     let inicioStr = "";
     let terminoStr = "";
     let inicioStrPrev = "";
     let terminoStrPrev = "";
     if (year) {
-      // if (inicio && termino) {
       inicioStr = `${year}-01-01`;
       terminoStr = `${year}-12-31`;
       inicioStrPrev = `${Number(year) - 1}-01-01`;
       terminoStrPrev = `${Number(year) - 1}-12-31`;
     } else {
-      console.log("Selecione o ano primeiro.");
+      toast.error("Selecione o ano primeiro.");
       return;
     }
 
@@ -121,29 +125,23 @@ export default function Page() {
       .then((res) => res.itens)
       .catch((error) => {
         console.error("Erro ao buscar receitas 12 meses:", error);
+        toast.error("Erro ao buscar receitas 12 meses.");
         return [];
       });
-    console.log("receitas12months: ", receitas12MonthsTemp);
     setReceitas12Months(receitas12MonthsTemp);
-
-    const despesas12MonthsTemp = await getDespesas(inicioStr, terminoStr)
-      .then((res) => res.itens)
-      .catch((error) => {
-        console.error("Erro ao buscar despesas 12 meses:", error);
-        return [];
-      });
-    console.log("despesas12months: ", despesas12MonthsTemp);
-    setDespesas12Months(despesas12MonthsTemp);
 
     // Primeiro, atualizar as categorias de cada centro de custo
     const updatedCentros = [...centrosDeCusto];
-    console.log("Categorias carregadas:", categorias);
-    console.log("Centros de custo antes da atualização:", updatedCentros);
+
+    // Para cada centro de custo, filtrar as categorias que pertencem a ele
     for (const centrocusto of centrosDeCusto) {
       const catFiltro = categorias.filter((cat) =>
         cat.nome.startsWith(centrocusto.codigo + ".")
       );
+
+      // Para cada categoria filtrada, buscar as despesas e receitas associadas
       for (const cat of catFiltro) {
+        // Buscar despesas para o ano selecionado
         const despesaCategoria = await getDespesas(inicioStr, terminoStr, [
           cat.id,
         ])
@@ -152,31 +150,40 @@ export default function Page() {
             console.error("Erro ao buscar despesas:", error);
             return [];
           });
+
+        // Buscar despesas para o ano anterior
         const despesaCategoriaPrev = await getDespesas(
           inicioStrPrev,
           terminoStrPrev,
           [cat.id]
         )
-          .then((res) => res.itens)
+          .then((resPrev) => resPrev.itens)
           .catch((error) => {
             console.error("Erro ao buscar despesas:", error);
             return [];
           });
 
+        // Atribuir as despesas encontradas à categoria
         cat.despesas = despesaCategoria;
         cat.despesasPrev = despesaCategoriaPrev;
-        // Calcula o total somando o campo 'total' de cada despesa, se existir, senão usa 'valor'
+
+        // Calcula o total somando o campo 'total' de cada despesa, se existir, senão usa 'valor', desde que o campo status seja "ACQUITTED" ou "RECEBIDO" para o status_traduzido
         cat.total = despesaCategoria.reduce(
           (acc: number, despesa: Despesa) =>
-            acc + (typeof despesa.total === "number" ? despesa.total : 0),
+            despesa.status_traduzido === "RECEBIDO"
+              ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
+              : acc,
           0
         );
         cat.totalPrev = despesaCategoriaPrev.reduce(
           (acc: number, despesa: Despesa) =>
-            acc + (typeof despesa.total === "number" ? despesa.total : 0),
+            despesa.status_traduzido === "RECEBIDO"
+              ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
+              : acc,
           0
         );
 
+        // Buscar receitas para o ano selecionado
         const receitaCategoria = await getReceitas(inicioStr, terminoStr, [
           cat.id,
         ])
@@ -185,6 +192,7 @@ export default function Page() {
             console.error("Erro ao buscar receitas:", error);
             return [];
           });
+        // Buscar receitas para o ano anterior
         const receitaCategoriaPrev = await getReceitas(
           inicioStrPrev,
           terminoStrPrev,
@@ -195,6 +203,8 @@ export default function Page() {
             console.error("Erro ao buscar receitas:", error);
             return [];
           });
+
+        // Atribuir as receitas encontradas à categoria
         cat.receitas = receitaCategoria;
         cat.receitasPrev = receitaCategoriaPrev;
 
@@ -209,13 +219,40 @@ export default function Page() {
             acc + (typeof receita.total === "number" ? receita.total : 0),
           0
         );
-      }
 
+        // Busca o Orçamento Previsto para o ano selecionado
+        const orcamentoPrevisto = await getBudgetByYear(year)
+          .then((res) => {
+            return res;
+          })
+          .catch((error) => {
+            console.error("Erro ao buscar orçamento do ano:", error);
+            return [];
+          });
+
+        // Atribui o orcamento no estado
+        setOrcamentoSelectedYear(orcamentoPrevisto);
+
+        // Atribuir o total do orçamento previsto à categoria
+        if (orcamentoPrevisto && orcamentoPrevisto.valores) {
+          const valorCategoria = orcamentoPrevisto.valores.find(
+            (valor) => valor.item?.descricao === cat.nome
+          );
+          cat.orcamentoAtual = valorCategoria
+            ? Number(valorCategoria.valor)
+            : 0;
+        } else {
+          cat.orcamentoAtual = 0;
+        }
+
+        // final do loop categorias
+      }
       centrocusto.categorias = catFiltro;
     }
+
+    setDespesas12Months([]);
     setCentrosDeCusto(updatedCentros);
     setSearching(false);
-    console.log("Centros de custo atualizados:", updatedCentros);
   }
 
   return (
@@ -264,32 +301,20 @@ export default function Page() {
 
           {switchReceitaDespesa ? (
             <>
-              <Label className="px-6 text-lg font-bold">Despesa</Label>
+              <DespesasContainer
+                centrosDeCusto={centrosDeCusto}
+                searching={searching}
+                despesas12months={despesas12months}
+                year={year}
+              />
             </>
           ) : (
-            <>
-              <Label className="px-6 text-lg font-bold">Receitas</Label>
-              <TotalPieExercicio
-                centrosDeCusto={centrosDeCusto}
-                searching={searching}
-                year={year}
-                title="Total de Receita Exercício"
-              />
-
-              <YearVsYear
-                centrosDeCusto={centrosDeCusto}
-                searching={searching}
-                year={year}
-                title="Receitas"
-              />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive
-                  values={receitas12months}
-                  title="Receitas"
-                />
-              </div>
-              {/*<DataTable data={data} />*/}
-            </>
+            <ReceitasContainer
+              centrosDeCusto={centrosDeCusto}
+              searching={searching}
+              year={year}
+              receitas12months={receitas12months}
+            />
           )}
         </div>
       </div>
