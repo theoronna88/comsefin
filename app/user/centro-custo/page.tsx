@@ -23,7 +23,7 @@ const CentrodeCustoPage = () => {
         const sessionId = session?.user?.id;
 
         if (sessionId && listCentrodeCusto.length === 0) {
-          const res = await getCentroCusto(sessionId);
+          const res = await getCentroCusto();
           setListCentrodeCusto(res.itens);
         }
       } catch (err) {

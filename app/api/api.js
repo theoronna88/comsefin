@@ -1,8 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { prisma } from "../_lib/prisma";
-// import redis from "../_lib/redis";
 
 export async function getApiUrl() {
   const params = new URLSearchParams({

@@ -14,13 +14,11 @@ import { SelectTrigger } from "@radix-ui/react-select";
 import { saveBudget } from "../api/api";
 import Budget from "../user/budget/page";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 interface Categoria {
-  id: number;
+  id: string;
   nome: string;
   tipo: string;
-  categoria_pai: string | null;
 }
 
 const FormBudget = ({
@@ -29,12 +27,11 @@ const FormBudget = ({
   onClose,
 }: {
   categorias: Categoria[];
-  budget: Budget;
+  budget: Budget | null;
   onClose: () => void;
 }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const [firstPass, setFirstPass] = useState(true);
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

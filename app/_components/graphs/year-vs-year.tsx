@@ -46,11 +46,13 @@ const YearVsYear = ({
   title,
 }: YearVsYearProps) => {
   // console.log("YearVsYear - centrosDeCusto: ", centrosDeCusto);
+  /*
   const chartDataAtual = centrosDeCusto
     .map((centro) => {
       const totalAtual = centro.categorias?.reduce((soma, categoria) => {
         return soma + (categoria.total ?? 0);
       }, 0);
+      
 
       const totalAnterior = centro.categorias?.reduce((soma, categoria) => {
         return soma + (categoria.totalPrev ?? 0);
@@ -63,6 +65,7 @@ const YearVsYear = ({
       };
     })
     .filter((item) => item.atual !== 0 && item.anterior !== 0);
+    */
 
   const chartReceitaData = centrosDeCusto
     .filter((centro) => {

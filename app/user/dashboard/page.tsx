@@ -59,11 +59,14 @@ export default function Page() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sessionId, setSessionId] = useState<string>("");
   const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
   const [receitas12months, setReceitas12Months] = useState([]);
-  const [despesas12months, setDespesas12Months] = useState<any[]>([]);
-  const [orcamentoSelectedYear, setOrcamentoSelectedYear] = useState<any[]>([]);
+  const [despesas12months, setDespesas12Months] = useState<[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  const [orcamentoSelectedYear, setOrcamentoSelectedYear] = useState<any>(null);
 
   useEffect(() => {
     // Get session ID from NextAuth cookie
@@ -234,7 +237,11 @@ export default function Page() {
         setOrcamentoSelectedYear(orcamentoPrevisto);
 
         // Atribuir o total do orçamento previsto à categoria
-        if (orcamentoPrevisto && orcamentoPrevisto.valores) {
+        if (
+          orcamentoPrevisto &&
+          !Array.isArray(orcamentoPrevisto) &&
+          orcamentoPrevisto.valores
+        ) {
           const valorCategoria = orcamentoPrevisto.valores.find(
             (valor) => valor.item?.descricao === cat.nome
           );

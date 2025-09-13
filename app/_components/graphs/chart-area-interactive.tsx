@@ -120,7 +120,17 @@ export function ChartAreaInteractive({
   values,
   title,
 }: ChartAreaInteractiveProps) {
-  const sumMonthReceita = (values) => {
+  const sumMonthReceita = (
+    values: Array<{
+      id: number;
+      total: number;
+      descricao: string;
+      status_traduzido: string;
+      nao_pago: number;
+      pago: number;
+      data_vencimento: string;
+    }>
+  ) => {
     for (let i = 1; i <= 12; i++) {
       const month = i;
       const filtered = values.filter((item) => {

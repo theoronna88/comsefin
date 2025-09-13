@@ -1,5 +1,4 @@
 "use client";
-import ListingCards from "@/app/_components/listing-cards";
 import { getCategorias } from "@/app/api/api";
 import { useEffect, useState } from "react";
 

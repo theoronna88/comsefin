@@ -1,15 +1,46 @@
 import ChartMultibar from "./graphs/chart-multibar";
 import { ChartConfig } from "./ui/chart";
 
+interface Categoria {
+  id: number;
+  nome: string;
+  despesas?: [];
+  despesasPrev?: [];
+  total?: number;
+  totalPrev?: number;
+  receitas?: [];
+  receitasPrev?: [];
+  totalReceitas?: number;
+  totalReceitasPrev?: number;
+  orcamentoAtual?: number;
+}
+
+interface DespesasContainerProps {
+  centrosDeCusto: Array<{
+    id: number;
+    codigo: string;
+    nome: string;
+    categorias?: Categoria[];
+  }>;
+  year: string;
+  despesas12months: Array<{
+    date: string;
+    totalDespesa: number;
+  }>;
+  searching: boolean;
+}
+
 const DespesasContainer = ({
   centrosDeCusto,
   year,
   despesas12months,
   searching,
-}) => {
+}: DespesasContainerProps) => {
   // Debug mostrar os dados recebidos
   console.log("Lista de centros de custo:", centrosDeCusto);
   // console.log("Despesas 12 meses:", despesas12months);
+  console.log("Dados de despesas:", despesas12months);
+  console.log("searching:", searching);
 
   const chartConfig = {
     despesa: {
@@ -24,13 +55,14 @@ const DespesasContainer = ({
 
   const dataCentroCusto = function () {
     const temp = [];
-    for (let centro of centrosDeCusto) {
+    for (const centro of centrosDeCusto) {
       let totalOrcamento = 0;
       let totalDespesa = 0;
 
-      for (let cat of centro.categorias) {
-        totalOrcamento += cat.orcamentoAtual;
-        totalDespesa += cat.total;
+      if (!centro.categorias) continue;
+      for (const cat of centro.categorias) {
+        totalOrcamento += cat.orcamentoAtual || 0;
+        totalDespesa += cat.total || 0;
       }
 
       temp.push({

@@ -23,10 +23,16 @@ import { useState } from "react";
 import { Button } from "@/app/_components/ui/button";
 import DialogBudgetForm from "@/app/_components/dialog-budget-form";
 
+type Categoria = {
+  id: string;
+  nome: string;
+  tipo: string;
+};
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  categorias: any[];
+  categorias: Categoria[];
 }
 
 function DataTable<TData, TValue>({
@@ -130,6 +136,8 @@ function DataTable<TData, TValue>({
           isOpen={isOpen}
           onClose={handleClose}
           categorias={categorias}
+          isEdit={false}
+          budget={null}
         />
       </div>
     </div>

@@ -1,7 +1,48 @@
 import FormBudget from "./form-budget";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
+import { Decimal } from "@prisma/client/runtime/library";
 
-const DialogBudgetForm = ({ isOpen, onClose, categorias, budget, isEdit }) => {
+interface Categoria {
+  id: string;
+  nome: string;
+  tipo: string;
+}
+
+interface Budget {
+  ano: number;
+  id: string;
+  valores: {
+    item: {
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      codigo: string;
+      descricao: string;
+      status: boolean;
+    };
+    id: string;
+    createdAt: Date;
+    valor: Decimal;
+    orcamentoId: string;
+    itemId: string;
+  }[];
+}
+
+interface DialogBudgetFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  categorias: Categoria[];
+  budget: Budget | null;
+  isEdit: boolean;
+}
+
+const DialogBudgetForm = ({
+  isOpen,
+  onClose,
+  categorias,
+  budget,
+  isEdit,
+}: DialogBudgetFormProps) => {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>

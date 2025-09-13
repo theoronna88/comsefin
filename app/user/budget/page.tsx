@@ -3,9 +3,10 @@ import { getBudget, getCategorias } from "@/app/api/api";
 import { useEffect, useState } from "react";
 import DataTable from "./data-table";
 import { columns } from "./columns";
+import { Decimal } from "@prisma/client/runtime/library";
 
 interface Categoria {
-  id: number;
+  id: string;
   nome: string;
   tipo: string;
   categoria_pai: string | null;
@@ -16,12 +17,19 @@ interface Budget {
   id: string;
   valores: {
     item: {
-      id: number;
-      descricao: string;
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
       codigo: string;
+      descricao: string;
+      status: boolean;
     };
-    valor: number;
-  };
+    id: string;
+    createdAt: Date;
+    valor: Decimal;
+    orcamentoId: string;
+    itemId: string;
+  }[];
 }
 
 const Budget = () => {
@@ -49,7 +57,7 @@ const Budget = () => {
     const fetchBudget = async () => {
       getBudget()
         .then((data) => {
-          console.log("Budget data:", data);
+          // console.log("Budget data:", data);
           setBudgets(data);
         })
         .catch((error) => {
