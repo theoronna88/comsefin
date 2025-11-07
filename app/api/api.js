@@ -44,7 +44,6 @@ export async function getToken(authorizationCode) {
     );
   }
 
-  console.log("Resposta do token:", resultText);
   return JSON.parse(resultText);
 }
 
@@ -220,7 +219,6 @@ export async function getReceitas(
 }
 
 export async function saveBudget(data) {
-  console.log("Dados recebidos no servidor:", data);
   //Verifica se é atualização ou criação
   if (data.id) {
     try {
@@ -343,14 +341,12 @@ export async function getBudget() {
 }
 
 export async function getBudgetByYear(year) {
-  console.log("getBudgetByYear - year:", year);
   const budget = await prisma.orcamentos.findFirst({
     where: { ano: Number(year) },
     include: {
       valores: { include: { item: true } },
     },
   });
-  console.log("getBudgetByYear - return: ", budget);
   return budget;
 }
 

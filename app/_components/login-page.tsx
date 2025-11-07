@@ -58,7 +58,6 @@ const LoginPage = () => {
       });
 
       if (res?.error) {
-        console.error("Erro de autenticação:", res.error);
         setError("Credenciais inválidas. Verifique seu usuário e senha.");
         if (res.error.includes("Token ContaAzul não encontrado")) {
           setError("Faça login novamente com a Conta Azul primeiro.");
@@ -73,8 +72,7 @@ const LoginPage = () => {
           setError("Erro ao criar sessão. Tente novamente.");
         }
       }
-    } catch (error) {
-      console.error("Erro no login: ", error);
+    } catch {
       setError("Erro interno do servidor. Tente novamente mais tarde");
     }
   };

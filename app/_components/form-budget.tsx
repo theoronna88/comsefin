@@ -51,11 +51,8 @@ const FormBudget = ({
           valor: Number(valor.replace(",", ".")),
         })),
     };
-    console.log("data: ", data);
-    console.log(formData);
     saveBudget(data)
-      .then((response) => {
-        console.log("Budget saved successfully:", response);
+      .then(() => {
         toast.success("Orçamento salvo com sucesso!");
         setFormData({});
         window.location.href = "/user/budget";
@@ -63,7 +60,6 @@ const FormBudget = ({
         onClose();
       })
       .catch((error) => {
-        console.error("Error saving budget:", error);
         toast.error("Erro ao salvar o orçamento. ", {
           description: error.message,
         });
