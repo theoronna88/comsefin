@@ -4,6 +4,8 @@ import { Session } from "next-auth";
 import { User } from "next-auth";
 import { prisma } from "@/app/_lib/prisma";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
+import { storeRedisToken } from "@/app/_lib/store-token";
 
 declare module "next-auth" {
   interface Session {
@@ -48,8 +50,12 @@ export const authOptions = {
         },
       },
       async authorize(credentials) {
+        const tokenContaAzul = cookies().get("tokenContaAzul")?.value;
+        if (!tokenContaAzul) {
+          throw new Error("Token ContaAzul não encontrado no cookie");
+        }
         if (!credentials?.username || !credentials?.password) {
-          throw new Error("Username e senha são obrigatórios");
+          throw new Error("Usuário e senha são obrigatórios");
         }
 
         try {
@@ -100,6 +106,12 @@ export const authOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
       }
+      const access_token = cookies().get("tokenContaAzul")?.value;
+      storeRedisToken({
+        sessionId: session.user.id,
+        accessToken: access_token!,
+      });
+
       return session;
     },
   },

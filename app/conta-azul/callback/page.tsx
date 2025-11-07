@@ -17,18 +17,8 @@ const CallbackContent = () => {
       if (code && state) {
         const token = await getToken(code);
 
-        const sessionId = crypto.randomUUID();
-
-        await fetch("/api/store-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ access_token: token.access_token, sessionId }),
-        });
-        document.cookie = `sessionId=${sessionId}; path=/user`;
-
-        router.push("/user/dashboard");
+        document.cookie = `tokenContaAzul=${token.access_token}; path=/`;
+        router.push("/login");
       } else {
         console.error("Código ou estado ausente na URL.");
       }

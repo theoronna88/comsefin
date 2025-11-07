@@ -15,8 +15,15 @@ export async function POST(req: Request) {
   cookies().set("session_id", sessionId, {
     httpOnly: true,
     secure: true,
-    path: "/user",
-    maxAge: 1200, // 20 minutos em segundos
+    path: "/",
+    maxAge: 1200,
+  });
+
+  cookies().set("access_token", access_token, {
+    httpOnly: true,
+    secure: true,
+    path: "/",
+    maxAge: 1200,
   });
 
   return NextResponse.json({ ok: true });
