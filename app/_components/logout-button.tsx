@@ -28,16 +28,9 @@ export function LogoutButton({
         "TokenContaAzul=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
       // Deletar dados do Redis
-      const response = await fetch("/api/get-redis-data", { method: "POST" });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Dados do Redis removidos:", data.message);
-      } else {
-        console.error("Erro ao remover dados do Redis:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Erro durante o logout:", error);
+      await fetch("/api/get-redis-data", { method: "POST" });
+    } catch {
+      // Ignorar erros na limpeza
     } finally {
       // Sempre executar o signOut, mesmo se houver erro na limpeza do Redis
       await signOut({

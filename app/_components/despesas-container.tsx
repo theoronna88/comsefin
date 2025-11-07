@@ -34,15 +34,13 @@ interface DespesasContainerProps {
 const DespesasContainer = ({
   centrosDeCusto,
   year,
-  despesas12months,
-  searching,
 }: DespesasContainerProps) => {
-  // Debug mostrar os dados recebidos
-  console.log("Lista de centros de custo:", centrosDeCusto);
-  // console.log("Despesas 12 meses:", despesas12months);
-  // console.log("Dados de despesas:", despesas12months);
-  // console.log("searching:", searching);
-  const [sortedCentros, setSortedCentros] = useState([]);
+  const [sortedCentros, setSortedCentros] = useState<Array<{
+    id: number;
+    codigo: string;
+    nome: string;
+    categorias?: Categoria[];
+  }>>([]);
 
   const chartConfig = {
     despesa: {
@@ -62,10 +60,14 @@ const DespesasContainer = ({
     setSortedCentros(
       filteredCentros.sort((a, b) => Number(a.codigo) - Number(b.codigo))
     );
-    console.log("Centros de custo ordenados:", sortedCentros);
-  }, []);
+  }, [centrosDeCusto, sortedCentros]);
 
-  const dataCentroCusto = function (sortedCentros) {
+  const dataCentroCusto = function (sortedCentros: Array<{
+    id: number;
+    codigo: string;
+    nome: string;
+    categorias?: Categoria[];
+  }>) {
     const temp = [];
     /*
     const filteredCentros = centrosDeCusto.filter(
@@ -108,7 +110,6 @@ const DespesasContainer = ({
         }
       }
     }
-    console.log("Dados para Projetos Institucionais:", temp);
 
     return temp;
   };
@@ -177,8 +178,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataPresidencia = function () {
@@ -194,8 +195,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataServicosPJ = function () {
@@ -211,8 +212,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataPessoal = function () {
@@ -228,8 +229,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataOperacional = function () {
@@ -245,8 +246,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataTributarias = function () {
@@ -262,8 +263,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   const dataInvestimentos = function () {
@@ -279,8 +280,8 @@ const DespesasContainer = ({
           });
         }
       }
-      return temp;
     }
+    return temp;
   };
 
   return (

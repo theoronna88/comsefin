@@ -21,11 +21,6 @@ interface ChartMultibarProps {
 }
 
 const ChartMultibar = ({ title, chartConfig, data }: ChartMultibarProps) => {
-  console.log("Renderizando ChartMultibar...");
-  console.log("Título do gráfico:", title);
-  console.log("Dados do gráfico:", data);
-  console.log("Configuração do gráfico:", chartConfig);
-
   return (
     <Card>
       <CardContent className="h-[700px] ">
