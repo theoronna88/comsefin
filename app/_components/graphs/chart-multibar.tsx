@@ -21,6 +21,8 @@ interface ChartMultibarProps {
 }
 
 const ChartMultibar = ({ title, chartConfig, data }: ChartMultibarProps) => {
+  console.log("Renderizando ChartMultibar...");
+  console.log("Título do gráfico:", title);
   console.log("Dados do gráfico:", data);
   console.log("Configuração do gráfico:", chartConfig);
 
@@ -48,7 +50,7 @@ const ChartMultibar = ({ title, chartConfig, data }: ChartMultibarProps) => {
                 />
 
                 <XAxis
-                  dataKey="centro"
+                  dataKey={data[0]?.centro ? "centro" : "categoria"}
                   tick={{ fontSize: 14 }}
                   interval={0}
                   angle={-45}
@@ -78,18 +80,7 @@ const ChartMultibar = ({ title, chartConfig, data }: ChartMultibarProps) => {
             </ResponsiveContainer>
             {/* Legenda fora do gráfico */}
             <div className="mt-6 flex justify-center gap-4 text-sm">
-              {
-                <>
-                  <div className="flex items-center gap-1">
-                    <span className="block w-4 h-4 bg-[var(--color-atual)] rounded-sm" />
-                    <span className="text-blue-900">oi</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="block w-4 h-4 bg-[var(--color-anterior)] rounded-sm" />
-                    <span className="text-blue-900">2</span>
-                  </div>
-                </>
-              }
+              {<></>}
             </div>
           </div>
         </ChartContainer>

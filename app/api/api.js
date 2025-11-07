@@ -1,6 +1,7 @@
 "use server";
 import { redirect } from "next/navigation";
 import { prisma } from "../_lib/prisma";
+import { cookies } from "next/headers";
 
 export async function getApiUrl() {
   const params = new URLSearchParams({
@@ -43,6 +44,7 @@ export async function getToken(authorizationCode) {
     );
   }
 
+  console.log("Resposta do token:", resultText);
   return JSON.parse(resultText);
 }
 
