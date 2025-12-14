@@ -69,7 +69,7 @@ const YearVsYear = ({
         0
       );
       return {
-        centro: centro.nome,
+        categoria: centro.nome,
         atual: totalReceitasAtual ?? 0,
         anterior: totalReceitasAnterior ?? 0,
       };

@@ -70,7 +70,7 @@ export function CategoryDropZone({
               {onRemoveCategoria && (
                 <button
                   type="button"
-                  onClick={() => onRemoveCategoria(categoria.id)}
+                  onClick={() => onRemoveCategoria(String(categoria.id))}
                   className="ml-1 hover:text-red-500 transition-colors"
                 >
                   <X className="h-3 w-3" />

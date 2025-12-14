@@ -16,11 +16,18 @@ const chartConfig = {
 
 const YearVsYearCategory = ({
   totaisReceita,
-  todasCategorias,
-  categorias,
   searching,
   year,
   title,
+}: {
+  totaisReceita: {
+    categoriaNome: string;
+    totais: { pago: { valor: number } };
+    totaisAnterior: { pago: { valor: number } };
+  }[];
+  searching: boolean;
+  year: string;
+  title: string;
 }) => {
   const chartReceitaData = totaisReceita.map((categoriaTotal) => {
     return {

@@ -33,9 +33,18 @@ import {
   TabsTrigger,
 } from "@/app/_components/ui/tabs";
 
+interface TotalDespesaItem {
+  categoriaId: number | string;
+  totais?: {
+    pago?: {
+      valor?: number;
+    };
+  };
+}
+
 interface GruposDespesasChartProps {
   grupos: GrupoDespesa[];
-  totaisDespesas: any[];
+  totaisDespesas: TotalDespesaItem[];
   searching: boolean;
   year: string;
 }
