@@ -5,7 +5,6 @@ import { User } from "next-auth";
 import { prisma } from "@/app/_lib/prisma";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-import { storeRedisToken } from "@/app/_lib/store-token";
 
 declare module "next-auth" {
   interface Session {
@@ -106,12 +105,6 @@ export const authOptions = {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
       }
-      const access_token = cookies().get("tokenContaAzul")?.value;
-      storeRedisToken({
-        sessionId: session.user.id,
-        accessToken: access_token!,
-      });
-
       return session;
     },
   },
