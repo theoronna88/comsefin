@@ -8,11 +8,11 @@ const LoggedLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <>
+        <div className="flex min-h-screen flex-col">
           <SiteHeader />
-          {children}
-          <Toaster />
-        </>
+          <main className="flex-1">{children}</main>
+          <Toaster position="top-right" />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
