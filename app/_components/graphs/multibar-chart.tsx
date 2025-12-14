@@ -12,7 +12,7 @@ import { ChartContainer } from "../ui/chart";
 
 interface MultiBarChartProps {
   chartData: Array<{
-    centro: string;
+    categoria: string;
     atual: number;
     anterior: number;
   }>;
@@ -40,7 +40,6 @@ const MultiBarChart = ({
   searching,
   title,
 }: MultiBarChartProps) => {
-  // console.log("MultiBarChart - chartData: ", chartData);
   return (
     <>
       <Card>
@@ -65,7 +64,7 @@ const MultiBarChart = ({
                   >
                     <CartesianGrid vertical={false} />
                     <XAxis
-                      dataKey="centro"
+                      dataKey="categoria"
                       tickLine={false}
                       angle={30}
                       textAnchor="start"

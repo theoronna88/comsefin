@@ -23,16 +23,17 @@ import { useState } from "react";
 import { Button } from "@/app/_components/ui/button";
 import DialogBudgetForm from "@/app/_components/dialog-budget-form";
 
-type Categoria = {
+interface Categorias {
   id: string;
   nome: string;
   tipo: string;
-};
+  categoria_pai: string | null;
+}
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  categorias: Categoria[];
+  categorias: Categorias[];
 }
 
 function DataTable<TData, TValue>({

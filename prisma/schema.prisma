@@ -69,11 +69,14 @@ model VerificationToken {
 
 model Orcamentos {
   id        String   @id @default(cuid())
-  ano       Int      @unique
+  ano       Int
+  userId    String?  @map("user_id") // ID do usuário do Conta Azul (sub do JWT) - nullable para dados existentes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   valores ValoresOrcamento[]
+
+  @@unique([ano, userId]) // Um usuário só pode ter um orçamento por ano
 }
 
 model ItensOrcamento {
