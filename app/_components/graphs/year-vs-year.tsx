@@ -45,28 +45,6 @@ const YearVsYear = ({
   year,
   title,
 }: YearVsYearProps) => {
-  // console.log("YearVsYear - centrosDeCusto: ", centrosDeCusto);
-  /*
-  const chartDataAtual = centrosDeCusto
-    .map((centro) => {
-      const totalAtual = centro.categorias?.reduce((soma, categoria) => {
-        return soma + (categoria.total ?? 0);
-      }, 0);
-      
-
-      const totalAnterior = centro.categorias?.reduce((soma, categoria) => {
-        return soma + (categoria.totalPrev ?? 0);
-      }, 0);
-
-      return {
-        centro: centro.nome,
-        atual: totalAtual ?? 0,
-        anterior: totalAnterior ?? 0,
-      };
-    })
-    .filter((item) => item.atual !== 0 && item.anterior !== 0);
-    */
-
   const chartReceitaData = centrosDeCusto
     .filter((centro) => {
       const codigoNum = Number(centro.codigo);
@@ -93,9 +71,6 @@ const YearVsYear = ({
     })
     .filter((item) => item.atual !== 0 && item.anterior !== 0);
 
-  // console.log("chartDataAtual: ", chartDataAtual);
-  // console.log("centrosDeCusto: ", centrosDeCusto);
-
   return (
     <div className="w-3/4 mx-auto">
       <MultiBarChart
@@ -110,19 +85,6 @@ const YearVsYear = ({
             : `${title} Ano x Ano`
         }
       />
-      {/*}
-      <MultiBarChart
-        chartData={chartDataAtual}
-        chartConfig={chartConfig}
-        year={year}
-        prevYear={Number(year) - 1}
-        searching={searching}
-        title={
-          year !== ""
-            ? `Despesas ${year} x ${Number(year) - 1}`
-            : "Despesas Ano x Ano"
-        }
-      /> */}
     </div>
   );
 };
