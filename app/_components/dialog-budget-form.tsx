@@ -2,12 +2,6 @@ import FormBudget from "./form-budget";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { Decimal } from "@prisma/client/runtime/library";
 
-interface Categoria {
-  id: string;
-  nome: string;
-  tipo: string;
-}
-
 interface Budget {
   ano: number;
   id: string;
@@ -28,10 +22,17 @@ interface Budget {
   }[];
 }
 
+interface Categorias {
+  id: string;
+  nome: string;
+  tipo: string;
+  categoria_pai: string | null;
+}
+
 interface DialogBudgetFormProps {
   isOpen: boolean;
   onClose: () => void;
-  categorias: Categoria[];
+  categorias: Categorias[];
   budget: Budget | null;
   isEdit: boolean;
 }
