@@ -1,16 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
-// import { DataTable } from "@/app/_components/data-table";
+import { useEffect, useState, useCallback } from "react";
 
-// import data from "./data.json";
 import { SearchIcon } from "lucide-react";
-import {
-  getBudgetByYear,
-  getCategorias,
-  getCentroCusto,
-  getDespesas,
-  getReceitas,
-} from "@/app/api/api";
+import { getCategorias, getCentroCusto } from "@/app/api/api";
 import { Label } from "@/app/_components/ui/label";
 import {
   Select,
@@ -20,69 +12,80 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { Button } from "@/app/_components/ui/button";
-import { Separator } from "@/app/_components/ui/separator";
-import { Switch } from "@/app/_components/ui/switch";
-import ReceitasContainer from "@/app/_components/receitas-container";
-import DespesasContainer from "@/app/_components/despesas-container";
+
 import { toast } from "sonner";
+import { fetchingReceitasComFiltros } from "@/app/_actions/receita-actions";
+import {
+  Categoria,
+  CentroCusto,
+  GrupoDespesa,
+  GRUPOS_DESPESAS_GRUPOPNG,
+} from "@/app/_lib/types";
+import { Checkbox } from "@/app/_components/ui/checkbox";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/app/_components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/_components/ui/card";
+import YearVsYearCategory from "@/app/_components/graphs/year-vs-year-category";
+import { PercentualCategoriasPie } from "@/app/_components/percentual-categorias-pie";
+import { fetchingDespesasComFiltros } from "@/app/_actions/despesa-actions";
+import { CategoryGroupManager } from "@/app/_components/drag-drop";
+import { GruposDespesasChart } from "@/app/_components/graphs/grupos-despesas-chart";
+
+interface SelectedCategory {
+  id: string;
+  nome: string;
+}
 
 export default function Page() {
-  interface Categoria {
-    id: number;
-    nome: string;
-    despesas?: [];
-    despesasPrev?: [];
-    total?: number;
-    totalPrev?: number;
-    receitas?: [];
-    receitasPrev?: [];
-    totalReceitas?: number;
-    totalReceitasPrev?: number;
-    orcamentoAtual?: number;
-  }
-
-  interface CentroCusto {
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }
-
-  interface Despesa {
-    id: number;
-    total: number;
-    status_traduzido: string;
-  }
-
   const [year, setYear] = useState<string>("");
   const [centrosDeCusto, setCentrosDeCusto] = useState<CentroCusto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+  const [categoriasReceita, setCategoriasReceita] = useState<Categoria[]>([]);
+  const [categoriasDespesa, setCategoriasDespesa] = useState<Categoria[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sessionId, setSessionId] = useState<string>("");
-  const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
-  const [receitas12months, setReceitas12Months] = useState([]);
-  const [despesas12months, setDespesas12Months] = useState<[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  const [orcamentoSelectedYear, setOrcamentoSelectedYear] = useState<any>(null);
 
-  useEffect(() => {
-    // Get session ID from NextAuth cookie
-    const sessionToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("next-auth.session-token="))
-      ?.split("=")[1];
+  const [selectedReceitasCategories, setSelectedReceitasCategories] = useState<
+    SelectedCategory[]
+  >([]);
+  const [selectedDespesasCategories, setSelectedDespesasCategories] = useState<
+    SelectedCategory[]
+  >([]);
 
-    if (sessionToken) {
-      setSessionId(sessionToken);
-    }
+  const [totaisReceita, setTotaisReceita] = useState<any[]>([]);
+  const [totaisDespesas, setTotaisDespesas] = useState<any[]>([]);
+
+  // Estado para os grupos de despesas (drag and drop)
+  const [gruposDespesas, setGruposDespesas] = useState<GrupoDespesa[]>(() =>
+    GRUPOS_DESPESAS_GRUPOPNG.map((g) => ({ ...g, categorias: [] }))
+  );
+
+  // Callback quando os grupos mudam
+  const handleGroupsChange = useCallback((grupos: GrupoDespesa[]) => {
+    setGruposDespesas(grupos);
+    // Atualizar as categorias selecionadas baseado nos grupos
+    const categoriasAgrupadas = grupos.flatMap((g) =>
+      g.categorias.map((c) => ({ id: c.id, nome: c.nome }))
+    );
+    setSelectedDespesasCategories(categoriasAgrupadas);
   }, []);
 
   useEffect(() => {
     const fetchCentrosDeCusto = async () => {
-      // console.log("Session ID:", sessionId);
       try {
         const res = await getCentroCusto();
         setCentrosDeCusto(res.itens);
@@ -93,8 +96,10 @@ export default function Page() {
 
     const fetchCategorias = async () => {
       try {
-        const res = await getCategorias();
-        setCategorias(res.itens);
+        const res = await getCategorias("RECEITA");
+        const res2 = await getCategorias("DESPESA");
+        setCategoriasReceita(res.itens);
+        setCategoriasDespesa(res2.itens);
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
       }
@@ -108,6 +113,14 @@ export default function Page() {
   }, [loading]);
 
   async function handleOnClick() {
+    if (year === "" || year === null) {
+      toast.error("Selecione o ano primeiro.");
+      return;
+    }
+    if (selectedReceitasCategories.length === 0) {
+      toast.error("Selecione ao menos uma categoria de receita.");
+      return;
+    }
     setSearching(true);
 
     let inicioStr = "";
@@ -124,205 +137,248 @@ export default function Page() {
       return;
     }
 
-    const receitas12MonthsTemp = await getReceitas(inicioStr, terminoStr)
-      .then((res) => res.itens)
-      .catch((error) => {
-        console.error("Erro ao buscar receitas 12 meses:", error);
-        toast.error("Erro ao buscar receitas 12 meses.");
-        return [];
-      });
-    setReceitas12Months(receitas12MonthsTemp);
-
-    // Primeiro, atualizar as categorias de cada centro de custo
-    const updatedCentros = [...centrosDeCusto];
-
-    // Para cada centro de custo, filtrar as categorias que pertencem a ele
-    for (const centrocusto of centrosDeCusto) {
-      const catFiltro = categorias.filter((cat) =>
-        cat.nome.startsWith(centrocusto.codigo + ".")
-      );
-
-      // Para cada categoria filtrada, buscar as despesas e receitas associadas
-      for (const cat of catFiltro) {
-        // Buscar despesas para o ano selecionado
-        const despesaCategoria = await getDespesas(inicioStr, terminoStr, [
-          cat.id,
-        ])
-          .then((res) => res.itens)
-          .catch((error) => {
-            console.error("Erro ao buscar despesas:", error);
-            return [];
-          });
-
-        // Buscar despesas para o ano anterior
-        const despesaCategoriaPrev = await getDespesas(
-          inicioStrPrev,
-          terminoStrPrev,
-          [cat.id]
-        )
-          .then((resPrev) => resPrev.itens)
-          .catch((error) => {
-            console.error("Erro ao buscar despesas:", error);
-            return [];
-          });
-
-        // Atribuir as despesas encontradas à categoria
-        cat.despesas = despesaCategoria;
-        cat.despesasPrev = despesaCategoriaPrev;
-
-        // Calcula o total somando o campo 'total' de cada despesa, se existir, senão usa 'valor', desde que o campo status seja "ACQUITTED" ou "RECEBIDO" para o status_traduzido
-        cat.total = despesaCategoria.reduce(
-          (acc: number, despesa: Despesa) =>
-            despesa.status_traduzido === "RECEBIDO"
-              ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
-              : acc,
-          0
-        );
-        cat.totalPrev = despesaCategoriaPrev.reduce(
-          (acc: number, despesa: Despesa) =>
-            despesa.status_traduzido === "RECEBIDO"
-              ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
-              : acc,
-          0
-        );
-
-        // Buscar receitas para o ano selecionado
-        const receitaCategoria = await getReceitas(inicioStr, terminoStr, [
-          cat.id,
-        ])
-          .then((res) => res.itens)
-          .catch((error) => {
-            console.error("Erro ao buscar receitas:", error);
-            return [];
-          });
-        // Buscar receitas para o ano anterior
-        const receitaCategoriaPrev = await getReceitas(
-          inicioStrPrev,
-          terminoStrPrev,
-          [cat.id]
-        )
-          .then((res) => res.itens)
-          .catch((error) => {
-            console.error("Erro ao buscar receitas:", error);
-            return [];
-          });
-
-        // Atribuir as receitas encontradas à categoria
-        cat.receitas = receitaCategoria;
-        cat.receitasPrev = receitaCategoriaPrev;
-
-        // Calcula o total de receitas
-        cat.totalReceitas = receitaCategoria.reduce(
-          (acc: number, receita: Despesa) =>
-            acc + (typeof receita.total === "number" ? receita.total : 0),
-          0
-        );
-        cat.totalReceitasPrev = receitaCategoriaPrev.reduce(
-          (acc: number, receita: Despesa) =>
-            acc + (typeof receita.total === "number" ? receita.total : 0),
-          0
-        );
-
-        // Busca o Orçamento Previsto para o ano selecionado
-        const orcamentoPrevisto = await getBudgetByYear(year)
-          .then((res) => {
-            return res;
-          })
-          .catch((error) => {
-            console.error("Erro ao buscar orçamento do ano:", error);
-            return [];
-          });
-
-        // Atribui o orcamento no estado
-        setOrcamentoSelectedYear(orcamentoPrevisto);
-
-        // Atribuir o total do orçamento previsto à categoria
-        if (
-          orcamentoPrevisto &&
-          !Array.isArray(orcamentoPrevisto) &&
-          orcamentoPrevisto.valores
-        ) {
-          const valorCategoria = orcamentoPrevisto.valores.find(
-            (valor) => valor.item?.descricao === cat.nome
-          );
-          cat.orcamentoAtual = valorCategoria
-            ? Number(valorCategoria.valor)
-            : 0;
-        } else {
-          cat.orcamentoAtual = 0;
-        }
-
-        // final do loop categorias
-      }
-      centrocusto.categorias = catFiltro;
-    }
-
-    setDespesas12Months([]);
-    setCentrosDeCusto(updatedCentros);
+    const temp = await fetchingReceitasComFiltros({
+      selectedReceitasCategories,
+      inicioStr,
+      terminoStr,
+      inicioStrPrev,
+      terminoStrPrev,
+    });
+    setTotaisReceita(temp);
     setSearching(false);
   }
+
+  async function handleOnDespesasClick() {
+    setSearching(true);
+
+    let inicioStr = "";
+    let terminoStr = "";
+    let inicioStrPrev = "";
+    let terminoStrPrev = "";
+    if (year) {
+      inicioStr = `${year}-01-01`;
+      terminoStr = `${year}-12-31`;
+      inicioStrPrev = `${Number(year) - 1}-01-01`;
+      terminoStrPrev = `${Number(year) - 1}-12-31`;
+    } else {
+      toast.error("Selecione o ano primeiro.");
+      return;
+    }
+
+    const temp = await fetchingDespesasComFiltros({
+      selectedDespesasCategories,
+      inicioStr,
+      terminoStr,
+      inicioStrPrev,
+      terminoStrPrev,
+    });
+    setTotaisDespesas(temp);
+    setSearching(false);
+  }
+
+  useEffect(() => {}, [selectedReceitasCategories, selectedDespesasCategories]);
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <div className="flex gap-3 items-end">
-            {/* Dropdown de ano */}
-            <div className="px-6">
-              <Label className="block text-sm font-medium mb-1">Ano:</Label>
-              <Select onValueChange={(value) => setYear(value)}>
-                <SelectTrigger className="border rounded px-2 py-1">
-                  <SelectValue placeholder="Selecione o ano" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Array.from({ length: 5 }).map((_, idx) => {
-                    const year = (new Date().getFullYear() - idx).toString();
-                    return (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button className="w-40" variant="outline" onClick={handleOnClick}>
-              <SearchIcon />
-              Buscar
-            </Button>
-            <div className="flex items-center gap-2 justify-center">
-              <div className="flex items-center space-x-2">
-                <Label>Receita</Label>
-                <Switch
-                  checked={switchReceitaDespesa}
-                  onCheckedChange={(checked) =>
-                    setSwitchReceitaDespesa(checked)
-                  }
-                />
-                <Label>Despesa</Label>
-              </div>
-            </div>
+          <div className="flex w-11/12 mx-auto flex-col gap-6">
+            <Tabs defaultValue="receitas">
+              <TabsList>
+                <TabsTrigger value="receitas">Receitas</TabsTrigger>
+                <TabsTrigger value="despesas">Despesas</TabsTrigger>
+              </TabsList>
+              <TabsContent value="receitas">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Receitas</CardTitle>
+                    <CardDescription>
+                      {/* Seleção de categorias de receita que irão aparecer no gráfico */}
+                      <div className="flex flex-1 flex-col p-8 bg-slate-200 rounded-lg">
+                        <div className="flex flex-wrap gap-4 mb-4">
+                          <Label className="w-full font-medium">
+                            Categorias de Receita:
+                          </Label>
+                          {categoriasReceita.map((categoria) => (
+                            <div
+                              key={categoria.id}
+                              className="flex items-center gap-2"
+                            >
+                              <Checkbox
+                                id={`${categoria.id}`}
+                                checked={selectedReceitasCategories.some(
+                                  (cat) => cat.id === categoria.id
+                                )}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedReceitasCategories((prev) => [
+                                      ...prev,
+                                      {
+                                        id: categoria.id,
+                                        nome: categoria.nome,
+                                      },
+                                    ]);
+                                  } else {
+                                    setSelectedReceitasCategories((prev) =>
+                                      prev.filter(
+                                        (cat) => cat.id !== categoria.id
+                                      )
+                                    );
+                                  }
+                                }}
+                              />
+                              <Label htmlFor={`${categoria.id}`}>
+                                {categoria.nome}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Dropdown de ano */}
+                      <div className="px-6 w-60">
+                        <Label className="block text-sm font-medium mb-1">
+                          Ano:
+                        </Label>
+                        <Select onValueChange={(value) => setYear(value)}>
+                          <SelectTrigger className="border rounded px-2 py-1">
+                            <SelectValue placeholder="Selecione o ano" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 5 }).map((_, idx) => {
+                              const year = (
+                                new Date().getFullYear() - idx
+                              ).toString();
+                              return (
+                                <SelectItem key={year} value={year}>
+                                  {year}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          className="w-40 mt-4"
+                          variant="outline"
+                          onClick={handleOnClick}
+                        >
+                          <SearchIcon />
+                          Buscar
+                        </Button>
+                      </div>
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    {/* Espaço para colocar o gráfico de receitas */}
+
+                    {/* Gráfico Pie Todas as Categorias para ver % de Receitas */}
+                    <PercentualCategoriasPie
+                      categorias={totaisReceita}
+                      searching={searching}
+                      year={year}
+                      title="Distribuição de Receitas por Categoria"
+                    />
+
+                    {/* Gráfico Multibar Ano x Ano */}
+                    <YearVsYearCategory
+                      totaisReceita={totaisReceita}
+                      todasCategorias={categoriasReceita}
+                      categorias={selectedReceitasCategories}
+                      searching={searching}
+                      year={year}
+                      title="Receitas"
+                    />
+
+                    {/* Gráfico Receitas ao longo do Ano - Verificar necessidade depois ! */}
+
+                    {/* Final do gráfico de receitas */}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="despesas">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Despesas</CardTitle>
+                    <CardDescription>
+                      Arraste as categorias para os grupos de despesas para
+                      organizar e visualizar os gráficos.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    {/* Sistema de Drag and Drop para agrupar categorias */}
+                    <CategoryGroupManager
+                      categorias={categoriasDespesa}
+                      onGroupsChange={handleGroupsChange}
+                      initialGroups={gruposDespesas}
+                    />
+
+                    {/* Seleção de ano e botão de buscar */}
+                    <div className="flex items-end gap-4 p-4 bg-slate-100 rounded-lg">
+                      <div className="w-48">
+                        <Label className="block text-sm font-medium mb-1">
+                          Ano:
+                        </Label>
+                        <Select onValueChange={(value) => setYear(value)}>
+                          <SelectTrigger className="border rounded px-2 py-1">
+                            <SelectValue placeholder="Selecione o ano" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 5 }).map((_, idx) => {
+                              const year = (
+                                new Date().getFullYear() - idx
+                              ).toString();
+                              return (
+                                <SelectItem key={year} value={year}>
+                                  {year}
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        variant="default"
+                        onClick={handleOnDespesasClick}
+                        disabled={selectedDespesasCategories.length === 0}
+                      >
+                        <SearchIcon className="mr-2 h-4 w-4" />
+                        Buscar Despesas
+                      </Button>
+                      {selectedDespesasCategories.length > 0 && (
+                        <span className="text-sm text-muted-foreground">
+                          {selectedDespesasCategories.length} categorias
+                          selecionadas
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Gráfico de Despesas por Grupos */}
+                    <GruposDespesasChart
+                      grupos={gruposDespesas}
+                      totaisDespesas={totaisDespesas}
+                      searching={searching}
+                      year={year}
+                    />
+
+                    {/* Gráfico Pie Todas as Categorias para ver % de Despesas 
+                    {totaisDespesas.length > 0 && (
+                      <PercentualCategoriasPie
+                        categorias={totaisDespesas}
+                        searching={searching}
+                        year={year}
+                        title="Distribuição de Despesas por Categoria"
+                      />
+                    )}
+*/}
+                    {/* Fim do gráfico de despesas */}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
-          <Separator />
-
-          {switchReceitaDespesa ? (
-            <>
-              <DespesasContainer
-                centrosDeCusto={centrosDeCusto}
-                searching={searching}
-                despesas12months={despesas12months}
-                year={year}
-              />
-            </>
-          ) : (
-            <ReceitasContainer
-              centrosDeCusto={centrosDeCusto}
-              searching={searching}
-              year={year}
-              receitas12months={receitas12months}
-            />
-          )}
+          {/* Espaço para colocar o relatório de receitas e despesas 
+            Chamar o gráfico com os checkboxes selecionados para fazer a busca somente das receitas das categorias selecionadas.
+          */}
         </div>
       </div>
     </div>
