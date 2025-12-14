@@ -14,39 +14,12 @@ import { deleteBudget, getCategorias } from "@/app/api/api";
 import { MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Decimal } from "@prisma/client/runtime/library";
+import type { Categoria, Orcamento } from "@/app/_lib/types";
 
-interface Categoria {
-  id: number;
-  nome: string;
-  tipo: string;
-  categoria_pai: string | null;
-}
-
-interface Budget {
-  ano: number;
-  id: string;
-  valores: {
-    item: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      codigo: string;
-      descricao: string;
-      status: boolean;
-    };
-    id: string;
-    createdAt: Date;
-    valor: Decimal;
-    orcamentoId: string;
-    itemId: string;
-  }[];
-}
-
-const BudgetActions = ({ budget }: { budget: Budget }) => {
+const BudgetActions = ({ budget }: { budget: Orcamento }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [categorias, setCategorias] = useState([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   const handleClose = () => {
     setIsOpen(false);

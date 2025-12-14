@@ -1,33 +1,15 @@
 import { useEffect, useState } from "react";
 import ChartMultibar from "./graphs/chart-multibar";
 import { ChartConfig } from "./ui/chart";
-
-interface Categoria {
-  id: number;
-  nome: string;
-  despesas?: [];
-  despesasPrev?: [];
-  total?: number;
-  totalPrev?: number;
-  receitas?: [];
-  receitasPrev?: [];
-  totalReceitas?: number;
-  totalReceitasPrev?: number;
-  orcamentoAtual?: number;
-}
+import type {
+  DespesaReceita,
+  CentroCustoComCategorias,
+} from "@/app/_lib/types";
 
 interface DespesasContainerProps {
-  centrosDeCusto: Array<{
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }>;
+  centrosDeCusto: CentroCustoComCategorias[];
   year: string;
-  despesas12months: Array<{
-    date: string;
-    totalDespesa: number;
-  }>;
+  despesas12months: DespesaReceita[];
   searching: boolean;
 }
 
@@ -35,12 +17,7 @@ const DespesasContainer = ({
   centrosDeCusto,
   year,
 }: DespesasContainerProps) => {
-  const [sortedCentros, setSortedCentros] = useState<Array<{
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }>>([]);
+  const [sortedCentros, setSortedCentros] = useState<CentroCustoComCategorias[]>([]);
 
   const chartConfig = {
     despesa: {
@@ -62,12 +39,7 @@ const DespesasContainer = ({
     );
   }, [centrosDeCusto, sortedCentros]);
 
-  const dataCentroCusto = function (sortedCentros: Array<{
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }>) {
+  const dataCentroCusto = function (sortedCentros: CentroCustoComCategorias[]) {
     const temp = [];
     /*
     const filteredCentros = centrosDeCusto.filter(

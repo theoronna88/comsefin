@@ -1,19 +1,8 @@
 import PieChartCard from "./graphs/pie-chart";
+import type { CentroCustoComCategorias } from "@/app/_lib/types";
 
 interface TotalPieExercicioProps {
-  centrosDeCusto: Array<{
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Array<{
-      id: number;
-      nome: string;
-      total?: number;
-      totalPrev?: number;
-      totalReceitas?: number;
-      totalReceitasPrev?: number;
-    }>;
-  }>;
+  centrosDeCusto: CentroCustoComCategorias[];
   searching: boolean;
   year: string;
   title?: string;

@@ -4,17 +4,10 @@ import { getCentroCusto } from "@/app/api/api";
 import { getSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import type { CentroCusto } from "@/app/_lib/types";
 
-type CentrodeCusto = {
-  id: number;
-  nome: string;
-  codigo: string;
-  ativo: boolean;
-};
 const CentrodeCustoPage = () => {
-  const [listCentrodeCusto, setListCentrodeCusto] = useState<CentrodeCusto[]>(
-    []
-  );
+  const [listCentrodeCusto, setListCentrodeCusto] = useState<CentroCusto[]>([]);
 
   useEffect(() => {
     const fetchCentroCusto = async () => {

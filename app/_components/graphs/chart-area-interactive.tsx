@@ -86,11 +86,11 @@ interface ChartAreaInteractiveProps {
   values: Array<{
     id: number;
     total: number;
-    descricao: string;
+    descricao?: string;
     status_traduzido: string;
-    nao_pago: number;
-    pago: number;
-    data_vencimento: string;
+    nao_pago?: number;
+    pago?: number;
+    data_vencimento?: string;
   }>;
   title?: string;
 }
@@ -124,16 +124,17 @@ export function ChartAreaInteractive({
     values: Array<{
       id: number;
       total: number;
-      descricao: string;
+      descricao?: string;
       status_traduzido: string;
-      nao_pago: number;
-      pago: number;
-      data_vencimento: string;
+      nao_pago?: number;
+      pago?: number;
+      data_vencimento?: string;
     }>
   ) => {
     for (let i = 1; i <= 12; i++) {
       const month = i;
       const filtered = values.filter((item) => {
+        if (!item.data_vencimento) return false;
         const date = new Date(item.data_vencimento);
         return month === date.getMonth() + 1;
       });

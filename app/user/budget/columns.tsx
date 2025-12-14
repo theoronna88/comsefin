@@ -3,9 +3,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
 import BudgetActions from "./budget-actions";
-import Budget from "./page";
+import type { Orcamento } from "@/app/_lib/types";
 
-export const columns: ColumnDef<Budget>[] = [
+export const columns: ColumnDef<Orcamento>[] = [
   {
     accessorKey: "ano",
     header: ({ column }) => {

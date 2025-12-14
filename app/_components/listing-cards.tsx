@@ -1,12 +1,8 @@
 import { Card } from "./ui/card";
+import type { CentroCusto } from "@/app/_lib/types";
 
 type ListingCardsProps = {
-  data: {
-    id: number;
-    nome: string;
-    codigo: string;
-    ativo: boolean;
-  }[];
+  data: CentroCusto[];
 };
 
 const ListingCards = ({ data }: ListingCardsProps) => {
