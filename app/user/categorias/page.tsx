@@ -16,6 +16,7 @@ const Categorias = () => {
           console.error("Erro ao buscar centros de custo:", error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -403,7 +403,7 @@ export async function saveBudget(data: BudgetInput): Promise<void> {
     }
 
     // CRIAÇÃO - Verifica se já existe orçamento para o ano
-    const existingBudget = await prisma.orcamentos.findUnique({
+    const existingBudget = await prisma.orcamentos.findFirst({
       where: { ano: Number(data.ano) },
     });
 

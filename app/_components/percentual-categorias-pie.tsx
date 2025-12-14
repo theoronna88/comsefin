@@ -1,11 +1,28 @@
 import PieChartCard from "./graphs/pie-chart";
 
+interface CategoriaComTotais {
+  categoriaNome: string;
+  totalReceitas?: number;
+  totais: {
+    pago: {
+      valor: number;
+    };
+  };
+}
+
+interface PercentualCategoriasPieProps {
+  categorias: CategoriaComTotais[];
+  searching: boolean;
+  year: string;
+  title: string;
+}
+
 export function PercentualCategoriasPie({
   categorias,
   searching,
   year,
   title,
-}) {
+}: PercentualCategoriasPieProps) {
   const colors = [
     "#2563eb", // azul
     "#10b981", // verde

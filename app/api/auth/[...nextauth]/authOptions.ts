@@ -1,6 +1,6 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
-import { Session, Account } from "next-auth";
+import { Session } from "next-auth";
 import { User } from "next-auth";
 
 // Estende os tipos do NextAuth para incluir os tokens do Conta Azul
@@ -121,11 +121,9 @@ export const authOptions = {
     async jwt({
       token,
       user,
-      account,
     }: {
       token: JWT;
       user?: User;
-      account?: Account | null;
     }) {
       // Login inicial - salva os tokens do Conta Azul
       if (user) {

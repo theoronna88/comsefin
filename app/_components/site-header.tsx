@@ -57,7 +57,7 @@ export function SiteHeader() {
                     {session.user.name || "Usuário"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    @{session.user.username}
+                    {session.user.email || session.user.id}
                   </p>
                 </div>
               </div>
