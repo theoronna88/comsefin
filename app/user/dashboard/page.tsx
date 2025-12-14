@@ -185,7 +185,11 @@ export default function Page() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  useEffect(() => {}, [selectedReceitasCategories, selectedDespesasCategories, centrosDeCusto]);
+  useEffect(() => {}, [
+    selectedReceitasCategories,
+    selectedDespesasCategories,
+    centrosDeCusto,
+  ]);
 
   return (
     <div className="flex flex-1 flex-col">
