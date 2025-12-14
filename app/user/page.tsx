@@ -9,34 +9,20 @@ const UserPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchRedisData = async () => {
-      try {
-        await fetch("/api/get-redis-data");
-      } catch (error) {
-        console.error("Erro ao conectar com a API:", error);
-      }
-    };
+    if (status === "loading") return;
 
-    if (session) {
-      fetchRedisData();
+    if (!session) {
+      router.push("/");
+    } else {
+      router.push("/user/dashboard");
     }
-  }, [session]);
+  }, [session, status, router]);
 
   if (status === "loading") {
     return <LoadingPage />;
   }
 
-  if (!session) {
-    router.push("/");
-  } else if (session) {
-    router.push("/user/dashboard");
-  }
-
-  return (
-    <div>
-      <h1>User Page 1</h1>
-    </div>
-  );
+  return null;
 };
 
 export default UserPage;
