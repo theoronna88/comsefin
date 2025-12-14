@@ -3,6 +3,7 @@ import { getToken } from "@/app/api/api";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import LoadingComsefaz from "@/app/_components/comsefaz-loading";
 
 const CallbackContent = () => {
@@ -15,12 +16,30 @@ const CallbackContent = () => {
       const code = searchParams.get("code");
       const state = searchParams.get("state");
       if (code && state) {
-        const token = await getToken(code);
+        try {
+          const tokenData = await getToken(code);
 
-        document.cookie = `tokenContaAzul=${token.access_token}; path=/`;
-        router.push("/login");
+          // Cria a sessão NextAuth com os tokens do Conta Azul
+          const result = await signIn("conta-azul", {
+            accessToken: tokenData.access_token,
+            refreshToken: tokenData.refresh_token,
+            expiresIn: tokenData.expires_in,
+            redirect: false,
+          });
+
+          if (result?.ok) {
+            router.push("/user/dashboard");
+          } else {
+            console.error("Erro ao criar sessão:", result?.error);
+            router.push("/");
+          }
+        } catch (error) {
+          console.error("Erro no callback:", error);
+          router.push("/");
+        }
       } else {
         console.error("Código ou estado ausente na URL.");
+        router.push("/");
       }
     }
 
