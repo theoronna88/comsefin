@@ -1,17 +1,37 @@
 import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export default withAuth({
-  callbacks: {
-    authorized: ({ token }) => !!token, // Permite apenas se tiver token (JWT)
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+
+    // Se houver erro de refresh token, redireciona para login
+    if (token?.error === "RefreshAccessTokenError") {
+      const url = new URL("/", req.url);
+      url.searchParams.set("error", "session_expired");
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
   },
-  pages: {
-    signIn: "/", // Redireciona para /login quando não autenticado
-  },
-});
+  {
+    callbacks: {
+      authorized: ({ token }) => {
+        // Permite acesso apenas se tiver um token válido
+        return !!token && !token.error;
+      },
+    },
+    pages: {
+      signIn: "/", // Redireciona para página inicial (login Conta Azul)
+    },
+  }
+);
 
 export const config = {
   matcher: [
-    "/user/:path*", // Protege apenas as rotas que começam com /user
-    // "/conta-azul",
+    // Protege todas as rotas /user/*
+    "/user/:path*",
+    // Não protege as rotas públicas
+    // Exclui explicitamente rotas que não devem ser protegidas
   ],
 };

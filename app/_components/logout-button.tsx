@@ -23,18 +23,14 @@ export function LogoutButton({
 }: LogoutButtonProps) {
   const handleLogout = async () => {
     try {
-      // Limpar cookie local
-      document.cookie =
-        "TokenContaAzul=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-      // Deletar dados do Redis
+      // Deletar dados do Redis (se necessário)
       await fetch("/api/get-redis-data", { method: "POST" });
     } catch {
       // Ignorar erros na limpeza
     } finally {
-      // Sempre executar o signOut, mesmo se houver erro na limpeza do Redis
+      // Sempre executar o signOut e redirecionar para a página inicial
       await signOut({
-        callbackUrl: "/login",
+        callbackUrl: "/",
         redirect: true,
       });
     }
