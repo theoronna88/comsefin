@@ -2,6 +2,7 @@
 
 import { ChartConfig } from "@/app/_components/ui/chart";
 import MultiBarChart from "./multibar-chart";
+import type { CentroCustoComCategorias } from "@/app/_lib/types";
 
 const chartConfig = {
   atual: {
@@ -14,26 +15,8 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface Categoria {
-  id: number;
-  nome: string;
-  despesas?: [];
-  despesasPrev?: [];
-  total?: number;
-  totalPrev?: number;
-  receitas?: [];
-  receitasPrev?: [];
-  totalReceitas?: number;
-  totalReceitasPrev?: number;
-}
-
 interface YearVsYearProps {
-  centrosDeCusto: Array<{
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }>;
+  centrosDeCusto: CentroCustoComCategorias[];
   searching: boolean;
   year: string;
   title?: string;
@@ -86,7 +69,7 @@ const YearVsYear = ({
         0
       );
       return {
-        centro: centro.nome,
+        categoria: centro.nome,
         atual: totalReceitasAtual ?? 0,
         anterior: totalReceitasAnterior ?? 0,
       };

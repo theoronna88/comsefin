@@ -25,46 +25,24 @@ import { Switch } from "@/app/_components/ui/switch";
 import ReceitasContainer from "@/app/_components/receitas-container";
 import DespesasContainer from "@/app/_components/despesas-container";
 import { toast } from "sonner";
+import type {
+  DespesaReceita,
+  CategoriaComDados,
+  CentroCustoComCategorias,
+} from "@/app/_lib/types";
 
 export default function Page() {
-  interface Categoria {
-    id: number;
-    nome: string;
-    despesas?: [];
-    despesasPrev?: [];
-    total?: number;
-    totalPrev?: number;
-    receitas?: [];
-    receitasPrev?: [];
-    totalReceitas?: number;
-    totalReceitasPrev?: number;
-    orcamentoAtual?: number;
-  }
-
-  interface CentroCusto {
-    id: number;
-    codigo: string;
-    nome: string;
-    categorias?: Categoria[];
-  }
-
-  interface Despesa {
-    id: number;
-    total: number;
-    status_traduzido: string;
-  }
-
   const [year, setYear] = useState<string>("");
-  const [centrosDeCusto, setCentrosDeCusto] = useState<CentroCusto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [centrosDeCusto, setCentrosDeCusto] = useState<CentroCustoComCategorias[]>([]);
+  const [categorias, setCategorias] = useState<CategoriaComDados[]>([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sessionId, setSessionId] = useState<string>("");
   const [switchReceitaDespesa, setSwitchReceitaDespesa] = useState(false); // false para Receita, true para Despesa
-  const [receitas12months, setReceitas12Months] = useState([]);
-  const [despesas12months, setDespesas12Months] = useState<[]>([]);
+  const [receitas12months, setReceitas12Months] = useState<DespesaReceita[]>([]);
+  const [despesas12months, setDespesas12Months] = useState<DespesaReceita[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   const [orcamentoSelectedYear, setOrcamentoSelectedYear] = useState<any>(null);
 
@@ -172,14 +150,14 @@ export default function Page() {
 
         // Calcula o total somando o campo 'total' de cada despesa, se existir, senão usa 'valor', desde que o campo status seja "ACQUITTED" ou "RECEBIDO" para o status_traduzido
         cat.total = despesaCategoria.reduce(
-          (acc: number, despesa: Despesa) =>
+          (acc: number, despesa: DespesaReceita) =>
             despesa.status_traduzido === "RECEBIDO"
               ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
               : acc,
           0
         );
         cat.totalPrev = despesaCategoriaPrev.reduce(
-          (acc: number, despesa: Despesa) =>
+          (acc: number, despesa: DespesaReceita) =>
             despesa.status_traduzido === "RECEBIDO"
               ? acc + (typeof despesa.total === "number" ? despesa.total : 0)
               : acc,
@@ -213,12 +191,12 @@ export default function Page() {
 
         // Calcula o total de receitas
         cat.totalReceitas = receitaCategoria.reduce(
-          (acc: number, receita: Despesa) =>
+          (acc: number, receita: DespesaReceita) =>
             acc + (typeof receita.total === "number" ? receita.total : 0),
           0
         );
         cat.totalReceitasPrev = receitaCategoriaPrev.reduce(
-          (acc: number, receita: Despesa) =>
+          (acc: number, receita: DespesaReceita) =>
             acc + (typeof receita.total === "number" ? receita.total : 0),
           0
         );

@@ -1,5 +1,4 @@
 "use client";
-import Budget from "../user/budget/page";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -9,10 +8,11 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { DropdownMenuItem } from "./ui/dropdown-menu";
+import type { Orcamento } from "@/app/_lib/types";
 
 interface DialogBudgetProps {
   ano: number;
-  budgets: Budget[];
+  budgets: Orcamento[];
 }
 
 const DialogBudget = ({ ano, budgets }: DialogBudgetProps) => {
@@ -39,12 +39,12 @@ const DialogBudget = ({ ano, budgets }: DialogBudgetProps) => {
           {budgets.map((budget) => (
             <div key={budget.id}>
               <div className="mb-4 ">
-                {budget.valores.map((valor) => (
+                {budget.valores?.map((valor) => (
                   <div
                     className="flex justify-between m-2 border-b border-gray-300"
-                    key={valor.item.id}
+                    key={valor.item?.id || valor.id}
                   >
-                    <span key={valor.item.id}>{valor.item.descricao}:</span>
+                    <span key={valor.item?.id || valor.id}>{valor.item?.descricao}:</span>
                     <span>
                       {Number(valor.valor).toLocaleString("pt-BR", {
                         style: "currency",

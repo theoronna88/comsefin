@@ -22,12 +22,7 @@ import { Input } from "@/app/_components/ui/input";
 import { useState } from "react";
 import { Button } from "@/app/_components/ui/button";
 import DialogBudgetForm from "@/app/_components/dialog-budget-form";
-
-type Categoria = {
-  id: string;
-  nome: string;
-  tipo: string;
-};
+import type { Categoria } from "@/app/_lib/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

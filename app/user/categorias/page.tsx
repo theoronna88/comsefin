@@ -1,12 +1,7 @@
 "use client";
 import { getCategorias } from "@/app/api/api";
 import { useEffect, useState } from "react";
-
-type Categoria = {
-  id: string;
-  nome: string;
-  tipo: string;
-};
+import type { Categoria } from "@/app/_lib/types";
 
 const Categorias = () => {
   const [listCategorias, setCategorias] = useState<Categoria[]>([]);
@@ -21,6 +16,7 @@ const Categorias = () => {
           console.error("Erro ao buscar centros de custo:", error);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

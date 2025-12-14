@@ -12,14 +12,8 @@ import {
 } from "./ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
 import { saveBudget } from "../api/api";
-import Budget from "../user/budget/page";
 import { toast } from "sonner";
-
-interface Categoria {
-  id: string;
-  nome: string;
-  tipo: string;
-}
+import type { Categoria, Orcamento } from "@/app/_lib/types";
 
 const FormBudget = ({
   categorias,
@@ -27,7 +21,7 @@ const FormBudget = ({
   onClose,
 }: {
   categorias: Categoria[];
-  budget: Budget | null;
+  budget: Orcamento | null;
   onClose: () => void;
 }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
@@ -72,8 +66,10 @@ const FormBudget = ({
       const existingData: { [key: string]: string } = {
         ano: budget.ano.toString(),
       };
-      budget.valores.forEach((valor) => {
-        existingData[valor.item.descricao] = valor.valor.toString();
+      budget.valores?.forEach((valor) => {
+        if (valor.item?.descricao) {
+          existingData[valor.item.descricao] = valor.valor.toString();
+        }
       });
       setFormData(existingData);
       setFirstPass(false);

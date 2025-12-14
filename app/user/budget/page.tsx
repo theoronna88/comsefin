@@ -3,38 +3,11 @@ import { getBudget, getCategorias } from "@/app/api/api";
 import { useEffect, useState } from "react";
 import DataTable from "./data-table";
 import { columns } from "./columns";
-import { Decimal } from "@prisma/client/runtime/library";
-
-interface Categoria {
-  id: string;
-  nome: string;
-  tipo: string;
-  categoria_pai: string | null;
-}
-
-interface Budget {
-  ano: number;
-  id: string;
-  valores: {
-    item: {
-      id: string;
-      createdAt: Date;
-      updatedAt: Date;
-      codigo: string;
-      descricao: string;
-      status: boolean;
-    };
-    id: string;
-    createdAt: Date;
-    valor: Decimal;
-    orcamentoId: string;
-    itemId: string;
-  }[];
-}
+import type { Categoria, Orcamento } from "@/app/_lib/types";
 
 const Budget = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [budgets, setBudgets] = useState<Orcamento[]>([]);
 
   useEffect(() => {
     const fetchCategorias = async () => {
