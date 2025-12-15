@@ -9,19 +9,27 @@ import {
   SelectGroup,
   SelectItem,
   SelectValue,
+  SelectTrigger,
 } from "./ui/select";
-import { SelectTrigger } from "@radix-ui/react-select";
-import { saveBudget } from "../api/api";
+import { saveBudget } from "@/app/api/orcamento";
+import Budget from "../user/budget/page";
 import { toast } from "sonner";
-import type { Categoria, Orcamento } from "@/app/_lib/types";
+import { Card, CardContent } from "./ui/card";
+
+interface Categorias {
+  id: string;
+  nome: string;
+  tipo: string;
+  categoria_pai: string | null;
+}
 
 const FormBudget = ({
   categorias,
   budget,
   onClose,
 }: {
-  categorias: Categoria[];
-  budget: Orcamento | null;
+  categorias: Categorias[];
+  budget: Budget | null;
   onClose: () => void;
 }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
@@ -67,14 +75,14 @@ const FormBudget = ({
         ano: budget.ano.toString(),
       };
       budget.valores?.forEach((valor) => {
-        if (valor.item?.descricao) {
-          existingData[valor.item.descricao] = valor.valor.toString();
-        }
+        existingData[valor.item.descricao] = valor.valor.toString();
       });
       setFormData(existingData);
       setFirstPass(false);
     }
   }, [budget, firstPass]);
+
+  console.log("Categorias formBudget: ", categorias);
 
   return (
     <>
@@ -103,18 +111,44 @@ const FormBudget = ({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {categorias.map((categoria) => (
-            <div key={categoria.id}>
-              <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
-              <Input
-                type="text"
-                name={categoria.nome}
-                placeholder={categoria.nome}
-                onChange={handleChange}
-                value={formData[categoria.nome] || ""}
-              />
-            </div>
-          ))}
+          <Card>
+            <CardContent className="bg-blue-50">
+              {/* Receitas */}
+              {categorias
+                .filter((cat) => cat.tipo === "RECEITA")
+                .map((categoria) => (
+                  <div key={categoria.id}>
+                    <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                    <Input
+                      type="text"
+                      name={categoria.nome}
+                      placeholder={categoria.nome}
+                      onChange={handleChange}
+                      value={formData[categoria.nome] || ""}
+                    />
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="bg-red-50">
+              {/* Despesas */}
+              {categorias
+                .filter((cat) => cat.tipo === "DESPESA")
+                .map((categoria) => (
+                  <div key={categoria.id}>
+                    <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                    <Input
+                      type="text"
+                      name={categoria.nome}
+                      placeholder={categoria.nome}
+                      onChange={handleChange}
+                      value={formData[categoria.nome] || ""}
+                    />
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
         </div>
         <div className="flex justify-end w-3/4 mx-auto">
           <Button type="submit" className="justify-end">

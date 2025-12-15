@@ -1,22 +1,55 @@
 "use client";
-import { getBudget, getCategorias } from "@/app/api/api";
+
+import { getBudget } from "@/app/api/orcamento";
 import { useEffect, useState } from "react";
 import DataTable from "./data-table";
 import { columns } from "./columns";
-import type { Categoria, Orcamento } from "@/app/_lib/types";
+import { Decimal } from "@prisma/client/runtime/library";
+import { getCategorias } from "@/app/api/api";
+
+interface Categoria {
+  id: string;
+  nome: string;
+  tipo: string;
+  categoria_pai?: string | null;
+}
+
+interface Budget {
+  ano: number;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  valores?: {
+    item: {
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      codigo: string;
+      descricao: string;
+      status: boolean;
+    };
+    id: string;
+    createdAt: Date;
+    valor: Decimal;
+    orcamentoId: string;
+    itemId: string;
+  }[];
+}
 
 const Budget = () => {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [budgets, setBudgets] = useState<Orcamento[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
 
   useEffect(() => {
     const fetchCategorias = async () => {
-      getCategorias()
+      let categoriasData: Categoria[] = [];
+      getCategorias("RECEITA")
         .then((data) => {
-          const filteredCategorias = data.itens.filter((categoria: Categoria) =>
-            categoria.nome.includes(".")
-          );
-          setCategorias(filteredCategorias);
+          categoriasData = data.itens || [];
+          getCategorias("DESPESA").then((dataDespesa) => {
+            categoriasData = categoriasData.concat(dataDespesa.itens || []);
+            setCategorias(categoriasData);
+          });
         })
         .catch((error) => {
           console.error("Error fetching categorias:", error);
@@ -29,10 +62,11 @@ const Budget = () => {
 
     const fetchBudget = async () => {
       getBudget()
-        .then((data) => {
-          // console.log("Budget data:", data);
-          setBudgets(data);
-        })
+        .then(
+          (
+            data // console.log("Budget data:", data);
+          ) => setBudgets(data)
+        )
         .catch((error) => {
           console.error("Error fetching budget:", error);
         });
