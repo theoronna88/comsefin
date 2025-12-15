@@ -5,8 +5,11 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
 
-    // Se houver erro de refresh token, redireciona para login
-    if (token?.error === "RefreshAccessTokenError") {
+    // Se o token expirou ou houver erro, redireciona para login
+    if (
+      token?.error === "RefreshAccessTokenError" ||
+      token?.error === "TokenExpiredError"
+    ) {
       const url = new URL("/", req.url);
       url.searchParams.set("error", "session_expired");
       return NextResponse.redirect(url);

@@ -41,6 +41,9 @@ import { fetchingDespesasComFiltros } from "@/app/_actions/despesa-actions";
 import { CategoryGroupManager } from "@/app/_components/drag-drop";
 import { GruposDespesasChart } from "@/app/_components/graphs/grupos-despesas-chart";
 
+// TODO: Acrescentar os outros gráficos de despesas.
+// TODO: Refatorar os gráficos de receitas para usar um gráfico parecido com o de despesas.
+
 interface SelectedCategory {
   id: string | number;
   nome: string;
