@@ -209,49 +209,56 @@ export default function Page() {
                   <CardHeader>
                     <CardTitle>Receitas</CardTitle>
                     <CardDescription>
-                      {/* Seleção de categorias de receita que irão aparecer no gráfico */}
-                      <div className="flex flex-1 flex-col p-8 bg-slate-200 rounded-lg">
-                        <div className="flex flex-wrap gap-4 mb-4">
-                          <Label className="w-full font-medium">
-                            Categorias de Receita:
-                          </Label>
-                          {categoriasReceita.map((categoria) => (
-                            <div
-                              key={categoria.id}
-                              className="flex items-center gap-2"
-                            >
-                              <Checkbox
-                                id={`${categoria.id}`}
-                                checked={selectedReceitasCategories.some(
-                                  (cat) => cat.id === categoria.id
-                                )}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    setSelectedReceitasCategories((prev) => [
-                                      ...prev,
-                                      {
-                                        id: categoria.id,
-                                        nome: categoria.nome,
-                                      },
-                                    ]);
-                                  } else {
-                                    setSelectedReceitasCategories((prev) =>
-                                      prev.filter(
-                                        (cat) => cat.id !== categoria.id
-                                      )
-                                    );
-                                  }
-                                }}
-                              />
-                              <Label htmlFor={`${categoria.id}`}>
-                                {categoria.nome}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
+                      Selecione as categorias de receita para visualizar os
+                      gráficos comparativos.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-6">
+                    {/* Seleção de categorias de receita que irão aparecer no gráfico */}
+                    <div className="flex flex-1 flex-col p-6 bg-slate-100 rounded-lg">
+                      <Label className="font-medium mb-4">
+                        Categorias de Receita:
+                      </Label>
+                      <div className="flex flex-wrap gap-4">
+                        {categoriasReceita.map((categoria) => (
+                          <div
+                            key={categoria.id}
+                            className="flex items-center gap-2"
+                          >
+                            <Checkbox
+                              id={`receita-${categoria.id}`}
+                              checked={selectedReceitasCategories.some(
+                                (cat) => cat.id === categoria.id
+                              )}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedReceitasCategories((prev) => [
+                                    ...prev,
+                                    {
+                                      id: categoria.id,
+                                      nome: categoria.nome,
+                                    },
+                                  ]);
+                                } else {
+                                  setSelectedReceitasCategories((prev) =>
+                                    prev.filter(
+                                      (cat) => cat.id !== categoria.id
+                                    )
+                                  );
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`receita-${categoria.id}`}>
+                              {categoria.nome}
+                            </Label>
+                          </div>
+                        ))}
                       </div>
-                      {/* Dropdown de ano */}
-                      <div className="px-6 w-60">
+                    </div>
+
+                    {/* Seleção de ano e botão de buscar */}
+                    <div className="flex items-end gap-4 p-4 bg-slate-100 rounded-lg">
+                      <div className="w-48">
                         <Label className="block text-sm font-medium mb-1">
                           Ano:
                         </Label>
@@ -272,18 +279,22 @@ export default function Page() {
                             })}
                           </SelectContent>
                         </Select>
-                        <Button
-                          className="w-40 mt-4"
-                          variant="outline"
-                          onClick={handleOnClick}
-                        >
-                          <SearchIcon />
-                          Buscar
-                        </Button>
                       </div>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-6">
+                      <Button
+                        variant="default"
+                        onClick={handleOnClick}
+                        disabled={selectedReceitasCategories.length === 0}
+                      >
+                        <SearchIcon className="mr-2 h-4 w-4" />
+                        Buscar Receitas
+                      </Button>
+                      {selectedReceitasCategories.length > 0 && (
+                        <span className="text-sm text-muted-foreground">
+                          {selectedReceitasCategories.length} categorias
+                          selecionadas
+                        </span>
+                      )}
+                    </div>
                     {/* Espaço para colocar o gráfico de receitas */}
 
                     {/* Gráfico Pie Todas as Categorias para ver % de Receitas */}

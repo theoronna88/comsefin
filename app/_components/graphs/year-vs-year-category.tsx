@@ -40,7 +40,7 @@ const YearVsYearCategory = ({
   });
 
   return (
-    <div className="w-3/4 mx-auto">
+    <div className="w-full">
       <MultiBarChart
         chartData={chartReceitaData}
         chartConfig={chartConfig}
