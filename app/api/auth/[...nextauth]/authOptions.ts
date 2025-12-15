@@ -38,50 +38,8 @@ declare module "next-auth/jwt" {
   }
 }
 
-// Função para renovar o token de acesso usando o refresh token
-async function refreshAccessToken(token: JWT): Promise<JWT> {
-  try {
-    const basicAuth = Buffer.from(
-      `${process.env.NEXT_CLIENT_ID}:${process.env.NEXT_CLIENT_SECRET}`
-    ).toString("base64");
-
-    const params = new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: token.refreshToken as string,
-    });
-
-    const response = await fetch(process.env.NEXT_TOKEN_URL as string, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${basicAuth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: params.toString(),
-    });
-
-    const refreshedTokens = await response.json();
-
-    if (!response.ok) {
-      console.error("Erro ao renovar token:", refreshedTokens);
-      throw new Error("Falha ao renovar token");
-    }
-
-    console.log("Token renovado com sucesso");
-
-    return {
-      ...token,
-      accessToken: refreshedTokens.access_token,
-      refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
-      accessTokenExpires: Date.now() + refreshedTokens.expires_in * 1000,
-    };
-  } catch (error) {
-    console.error("Erro ao renovar access token:", error);
-    return {
-      ...token,
-      error: "RefreshAccessTokenError",
-    };
-  }
-}
+// Token da Conta Azul expira em 1 hora - forçamos logout para refazer autenticação
+const TOKEN_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hora em milissegundos
 
 export const authOptions = {
   providers: [
@@ -114,17 +72,11 @@ export const authOptions = {
   ],
   session: {
     strategy: "jwt" as const,
-    // Tempo máximo da sessão - 7 dias (o refresh token permite renovar)
-    maxAge: 7 * 24 * 60 * 60,
+    // Tempo máximo da sessão - 1 hora (token da Conta Azul expira)
+    maxAge: 60 * 60, // 1 hora em segundos
   },
   callbacks: {
-    async jwt({
-      token,
-      user,
-    }: {
-      token: JWT;
-      user?: User;
-    }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       // Login inicial - salva os tokens do Conta Azul
       if (user) {
         return {
@@ -132,18 +84,20 @@ export const authOptions = {
           id: user.id,
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
-          accessTokenExpires: Date.now() + user.expiresIn * 1000,
+          accessTokenExpires: Date.now() + TOKEN_EXPIRATION_TIME,
         };
       }
 
-      // Token ainda válido - retorna sem modificar
-      if (token.accessTokenExpires && Date.now() < token.accessTokenExpires) {
-        return token;
+      // Verifica se o token expirou - força logout
+      if (token.accessTokenExpires && Date.now() >= token.accessTokenExpires) {
+        console.log("Token da Conta Azul expirou, forçando logout...");
+        return {
+          ...token,
+          error: "TokenExpiredError",
+        };
       }
 
-      // Token expirado - tenta renovar
-      console.log("Token expirado, tentando renovar...");
-      return await refreshAccessToken(token);
+      return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
       // Passa os tokens para a sessão do cliente
