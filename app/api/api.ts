@@ -2,12 +2,13 @@
 
 import { redirect } from "next/navigation";
 import { prisma } from "../_lib/prisma";
-import { withContaAzulAuth } from "../_lib/withContaAzulAuth";
+import { getContaAzulToken } from "../_lib/conta-azul-auth";
 import {
   AppError,
   ConflictError,
   DatabaseError,
   ExternalAPIError,
+  AuthenticationError,
   handleError,
 } from "../_lib/errors";
 import type {
@@ -46,7 +47,9 @@ export async function getApiUrl(): Promise<never> {
  * @param authorizationCode - Código de autorização recebido do OAuth
  * @returns Token de acesso e refresh token
  */
-export async function getToken(authorizationCode: string): Promise<TokenResponse> {
+export async function getToken(
+  authorizationCode: string
+): Promise<TokenResponse> {
   const basicAuth = Buffer.from(
     `${process.env.NEXT_CLIENT_ID}:${process.env.NEXT_CLIENT_SECRET}`
   ).toString("base64");
@@ -93,34 +96,42 @@ export async function getToken(authorizationCode: string): Promise<TokenResponse
  *
  * @returns Lista paginada de centros de custo
  */
-export async function getCentroCusto(): Promise<ContaAzulPaginatedResponse<CentroCusto>> {
-  return withContaAzulAuth(async (accessToken) => {
-    try {
-      const query = new URLSearchParams({
-        pagina: "1",
-        tamanho_pagina: "50",
-      }).toString();
+export async function getCentroCusto(): Promise<
+  ContaAzulPaginatedResponse<CentroCusto>
+> {
+  try {
+    const accessToken = await getContaAzulToken();
 
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/centro-de-custo?${query}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+    if (!accessToken) {
+      throw new AuthenticationError(
+        "Token da Conta Azul não encontrado. Faça login novamente."
       );
-
-      if (!response.ok) {
-        throw new ExternalAPIError("Falha ao buscar centros de custo.");
-      }
-
-      return response.json() as Promise<ContaAzulPaginatedResponse<CentroCusto>>;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw handleError(error);
     }
-  });
+
+    const query = new URLSearchParams({
+      pagina: "1",
+      tamanho_pagina: "50",
+    }).toString();
+
+    const response = await fetch(
+      `${process.env.NEXT_API_URL}/centro-de-custo?${query}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new ExternalAPIError("Falha ao buscar centros de custo.");
+    }
+
+    return response.json() as Promise<ContaAzulPaginatedResponse<CentroCusto>>;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw handleError(error);
+  }
 }
 
 /**
@@ -129,78 +140,90 @@ export async function getCentroCusto(): Promise<ContaAzulPaginatedResponse<Centr
  * @returns Lista paginada de pessoas
  */
 export async function getPessoa(): Promise<ContaAzulPaginatedResponse<Pessoa>> {
-  return withContaAzulAuth(async (accessToken) => {
-    try {
-      const params = new URLSearchParams({
-        pagina: "1",
-        tamanho_pagina: "1000",
-      }).toString();
+  try {
+    const accessToken = await getContaAzulToken();
 
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/pessoa?${params}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+    if (!accessToken) {
+      throw new AuthenticationError(
+        "Token da Conta Azul não encontrado. Faça login novamente."
       );
-
-      if (!response.ok) {
-        throw new ExternalAPIError("Falha ao buscar pessoas.");
-      }
-
-      return response.json() as Promise<ContaAzulPaginatedResponse<Pessoa>>;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw handleError(error);
     }
-  });
+
+    const params = new URLSearchParams({
+      pagina: "1",
+      tamanho_pagina: "1000",
+    }).toString();
+
+    const response = await fetch(
+      `${process.env.NEXT_API_URL}/pessoa?${params}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new ExternalAPIError("Falha ao buscar pessoas.");
+    }
+
+    return response.json() as Promise<ContaAzulPaginatedResponse<Pessoa>>;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw handleError(error);
+  }
 }
 
 /**
  * Busca as categorias da Conta Azul
  *
- * @param busca - Termo opcional para filtrar categorias por nome
+ * @param tipo - Termo opcional para filtrar categorias por nome
  * @returns Lista paginada de categorias
  */
 export async function getCategorias(
-  busca?: string
+  tipo?: string
 ): Promise<ContaAzulPaginatedResponse<Categoria>> {
-  return withContaAzulAuth(async (accessToken) => {
-    try {
-      const queryParams: Record<string, string> = {
-        pagina: "1",
-        tamanho_pagina: "50",
-        permite_apenas_filhos: "false",
-      };
+  try {
+    const accessToken = await getContaAzulToken();
 
-      if (busca) {
-        queryParams.nome = busca;
-      }
-
-      const query = new URLSearchParams(queryParams).toString();
-
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/categorias?${query}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+    if (!accessToken) {
+      throw new AuthenticationError(
+        "Token da Conta Azul não encontrado. Faça login novamente."
       );
-
-      if (!response.ok) {
-        throw new ExternalAPIError("Falha ao buscar categorias.");
-      }
-
-      return response.json() as Promise<ContaAzulPaginatedResponse<Categoria>>;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw handleError(error);
     }
-  });
+
+    const queryParams: Record<string, string> = {
+      pagina: "1",
+      tamanho_pagina: "100",
+      permite_apenas_filhos: "false",
+    };
+
+    if (tipo) {
+      queryParams.tipo = tipo;
+    }
+
+    const query = new URLSearchParams(queryParams).toString();
+
+    const response = await fetch(
+      `${process.env.NEXT_API_URL}/categorias?${query}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new ExternalAPIError("Falha ao buscar categorias.");
+    }
+
+    return response.json() as Promise<ContaAzulPaginatedResponse<Categoria>>;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw handleError(error);
+  }
 }
 
 /**
@@ -218,48 +241,64 @@ export async function getDespesas(
   categorias?: string | (string | number)[],
   centrosDeCusto?: string | (string | number)[]
 ): Promise<ContaAzulPaginatedResponse<DespesaReceita>> {
-  return withContaAzulAuth(async (accessToken) => {
-    try {
-      const queryParams: Record<string, string> = {
-        pagina: "1",
-        tamanho_pagina: "1000",
-        data_vencimento_de: dataVencimentoDe,
-        data_vencimento_ate: dataVencimentoAte,
-      };
+  try {
+    const accessToken = await getContaAzulToken();
 
-      if (categorias && (Array.isArray(categorias) ? categorias.length > 0 : categorias)) {
-        queryParams.ids_categorias = Array.isArray(categorias)
-          ? categorias.join(",")
-          : String(categorias);
-      }
-      if (centrosDeCusto && (Array.isArray(centrosDeCusto) ? centrosDeCusto.length > 0 : centrosDeCusto)) {
-        queryParams.ids_centros_de_custo = Array.isArray(centrosDeCusto)
-          ? centrosDeCusto.join(",")
-          : String(centrosDeCusto);
-      }
-
-      const query = new URLSearchParams(queryParams).toString();
-
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/financeiro/eventos-financeiros/contas-a-pagar/buscar?${query}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+    if (!accessToken) {
+      throw new AuthenticationError(
+        "Token da Conta Azul não encontrado. Faça login novamente."
       );
-
-      if (!response.ok) {
-        throw new ExternalAPIError("Falha ao buscar despesas.");
-      }
-
-      return response.json() as Promise<ContaAzulPaginatedResponse<DespesaReceita>>;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw handleError(error);
     }
-  });
+
+    const queryParams: Record<string, string> = {
+      pagina: "1",
+      tamanho_pagina: "1000",
+      data_vencimento_de: dataVencimentoDe,
+      data_vencimento_ate: dataVencimentoAte,
+    };
+
+    if (
+      categorias &&
+      (Array.isArray(categorias) ? categorias.length > 0 : categorias)
+    ) {
+      queryParams.ids_categorias = Array.isArray(categorias)
+        ? categorias.join(",")
+        : String(categorias);
+    }
+    if (
+      centrosDeCusto &&
+      (Array.isArray(centrosDeCusto)
+        ? centrosDeCusto.length > 0
+        : centrosDeCusto)
+    ) {
+      queryParams.ids_centros_de_custo = Array.isArray(centrosDeCusto)
+        ? centrosDeCusto.join(",")
+        : String(centrosDeCusto);
+    }
+
+    const query = new URLSearchParams(queryParams).toString();
+
+    const response = await fetch(
+      `${process.env.NEXT_API_URL}/financeiro/eventos-financeiros/contas-a-pagar/buscar?${query}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new ExternalAPIError("Falha ao buscar despesas.");
+    }
+
+    return response.json() as Promise<
+      ContaAzulPaginatedResponse<DespesaReceita>
+    >;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw handleError(error);
+  }
 }
 
 /**
@@ -277,48 +316,64 @@ export async function getReceitas(
   categorias?: string | (string | number)[],
   centrosDeCusto?: string | (string | number)[]
 ): Promise<ContaAzulPaginatedResponse<DespesaReceita>> {
-  return withContaAzulAuth(async (accessToken) => {
-    try {
-      const queryParams: Record<string, string> = {
-        pagina: "1",
-        tamanho_pagina: "1000",
-        data_vencimento_de: dataVencimentoDe,
-        data_vencimento_ate: dataVencimentoAte,
-      };
+  try {
+    const accessToken = await getContaAzulToken();
 
-      if (categorias && (Array.isArray(categorias) ? categorias.length > 0 : categorias)) {
-        queryParams.ids_categorias = Array.isArray(categorias)
-          ? categorias.join(",")
-          : String(categorias);
-      }
-      if (centrosDeCusto && (Array.isArray(centrosDeCusto) ? centrosDeCusto.length > 0 : centrosDeCusto)) {
-        queryParams.ids_centros_de_custo = Array.isArray(centrosDeCusto)
-          ? centrosDeCusto.join(",")
-          : String(centrosDeCusto);
-      }
-
-      const query = new URLSearchParams(queryParams).toString();
-
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/financeiro/eventos-financeiros/contas-a-receber/buscar?${query}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+    if (!accessToken) {
+      throw new AuthenticationError(
+        "Token da Conta Azul não encontrado. Faça login novamente."
       );
-
-      if (!response.ok) {
-        throw new ExternalAPIError("Falha ao buscar receitas.");
-      }
-
-      return response.json() as Promise<ContaAzulPaginatedResponse<DespesaReceita>>;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw handleError(error);
     }
-  });
+
+    const queryParams: Record<string, string> = {
+      pagina: "1",
+      tamanho_pagina: "1000",
+      data_vencimento_de: dataVencimentoDe,
+      data_vencimento_ate: dataVencimentoAte,
+    };
+
+    if (
+      categorias &&
+      (Array.isArray(categorias) ? categorias.length > 0 : categorias)
+    ) {
+      queryParams.ids_categorias = Array.isArray(categorias)
+        ? categorias.join(",")
+        : String(categorias);
+    }
+    if (
+      centrosDeCusto &&
+      (Array.isArray(centrosDeCusto)
+        ? centrosDeCusto.length > 0
+        : centrosDeCusto)
+    ) {
+      queryParams.ids_centros_de_custo = Array.isArray(centrosDeCusto)
+        ? centrosDeCusto.join(",")
+        : String(centrosDeCusto);
+    }
+
+    const query = new URLSearchParams(queryParams).toString();
+
+    const response = await fetch(
+      `${process.env.NEXT_API_URL}/financeiro/eventos-financeiros/contas-a-receber/buscar?${query}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new ExternalAPIError("Falha ao buscar receitas.");
+    }
+
+    return response.json() as Promise<
+      ContaAzulPaginatedResponse<DespesaReceita>
+    >;
+  } catch (error) {
+    if (error instanceof AppError) throw error;
+    throw handleError(error);
+  }
 }
 
 // ==========================================
@@ -343,7 +398,9 @@ export async function saveBudget(data: BudgetInput): Promise<void> {
       });
 
       if (existingBudget && existingBudget.id !== data.id) {
-        throw new ConflictError(`Já existe um orçamento para o ano ${data.ano}.`);
+        throw new ConflictError(
+          `Já existe um orçamento para o ano ${data.ano}.`
+        );
       }
 
       // Usa transação para garantir consistência
@@ -479,7 +536,9 @@ export async function getBudget(): Promise<Orcamento[]> {
  * @param year - Ano do orçamento
  * @returns O orçamento encontrado ou null
  */
-export async function getBudgetByYear(year: number | string): Promise<Orcamento | null> {
+export async function getBudgetByYear(
+  year: number | string
+): Promise<Orcamento | null> {
   try {
     const budget = await prisma.orcamentos.findFirst({
       where: { ano: Number(year) },
