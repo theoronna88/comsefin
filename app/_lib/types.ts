@@ -57,7 +57,7 @@ export interface ContaAzulPaginatedResponse<T> {
  * Centro de custo da Conta Azul
  */
 export interface CentroCusto {
-  id: number;
+  id: string;
   codigo: string;
   nome: string;
   ativo?: boolean;
@@ -67,7 +67,7 @@ export interface CentroCusto {
  * Categoria da Conta Azul
  */
 export interface Categoria {
-  id: number | string;
+  id: string;
   nome: string;
   tipo: string;
   categoria_pai?: string | null;
