@@ -44,16 +44,17 @@ const BudgetActions = ({ budget }: { budget: Orcamento }) => {
 
   useEffect(() => {
     const fetchCategorias = async () => {
-      getCategorias()
-        .then((data) => {
-          const filteredCategorias = data.itens.filter((categoria: Categoria) =>
-            categoria.nome.includes(".")
-          );
-          setCategorias(filteredCategorias);
-        })
-        .catch((error) => {
-          console.error("Error fetching categorias:", error);
-        });
+      try {
+        const receitaData = await getCategorias("RECEITA");
+        const despesaData = await getCategorias("DESPESA");
+        const todasCategorias = [
+          ...(receitaData.itens || []),
+          ...(despesaData.itens || []),
+        ];
+        setCategorias(todasCategorias);
+      } catch (error) {
+        console.error("Error fetching categorias:", error);
+      }
     };
 
     if (categorias.length === 0) {

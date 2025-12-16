@@ -75,10 +75,12 @@ export async function saveBudget(data) {
       });
       //Atualiza os valores do orçamento
       for (const categoria of data.categorias) {
-        const catCodigo = categoria.nome.split(" ")[0];
+        // Usar categoriaId como código único
+        const catCodigo = categoria.categoriaId;
+        const catNome = categoria.nome || categoria.categoriaId;
+
         const existingItem = await prisma.itensOrcamento.findFirst({
           where: {
-            descricao: categoria.nome,
             codigo: catCodigo,
           },
         });
@@ -86,10 +88,16 @@ export async function saveBudget(data) {
         if (!existingItem) {
           item = await prisma.itensOrcamento.create({
             data: {
-              descricao: categoria.nome,
+              descricao: catNome,
               codigo: catCodigo,
               status: true,
             },
+          });
+        } else {
+          // Atualiza o nome/descrição caso tenha mudado
+          await prisma.itensOrcamento.update({
+            where: { id: existingItem.id },
+            data: { descricao: catNome },
           });
         }
         const existingValue = await prisma.valoresOrcamento.findFirst({
@@ -141,10 +149,12 @@ export async function saveBudget(data) {
 
   //Verifica se os itens do orçamento já existem e cria novos itens
   for (const categoria of data.categorias) {
-    const catCodigo = categoria.nome.split(" ")[0];
+    // Usar categoriaId como código único
+    const catCodigo = categoria.categoriaId;
+    const catNome = categoria.nome || categoria.categoriaId;
+
     const existingItem = await prisma.itensOrcamento.findFirst({
       where: {
-        descricao: categoria.nome,
         codigo: catCodigo,
       },
     });
@@ -153,10 +163,16 @@ export async function saveBudget(data) {
     if (!existingItem) {
       item = await prisma.itensOrcamento.create({
         data: {
-          descricao: categoria.nome,
+          descricao: catNome,
           codigo: catCodigo,
           status: true,
         },
+      });
+    } else {
+      // Atualiza o nome/descrição caso tenha mudado
+      await prisma.itensOrcamento.update({
+        where: { id: existingItem.id },
+        data: { descricao: catNome },
       });
     }
 

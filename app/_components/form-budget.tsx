@@ -12,24 +12,17 @@ import {
   SelectTrigger,
 } from "./ui/select";
 import { saveBudget } from "@/app/api/orcamento";
-import Budget from "../user/budget/page";
 import { toast } from "sonner";
 import { Card, CardContent } from "./ui/card";
-
-interface Categorias {
-  id: string;
-  nome: string;
-  tipo: string;
-  categoria_pai: string | null;
-}
+import type { Categoria, Orcamento } from "@/app/_lib/types";
 
 const FormBudget = ({
   categorias,
   budget,
   onClose,
 }: {
-  categorias: Categorias[];
-  budget: Budget | null;
+  categorias: Categoria[];
+  budget: Orcamento | null;
   onClose: () => void;
 }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
@@ -43,13 +36,17 @@ const FormBudget = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Mapear os IDs das categorias para seus nomes
+    const categoriaMap = new Map(categorias.map((cat) => [cat.id, cat.nome]));
+
     const data = {
       id: budget?.id,
       ano: formData?.ano,
       categorias: Object.entries(formData)
         .filter(([key]) => key !== "ano")
-        .map(([nome, valor]) => ({
-          nome,
+        .map(([categoriaId, valor]) => ({
+          categoriaId,
+          nome: categoriaMap.get(categoriaId) || categoriaId,
           valor: Number(valor.replace(",", ".")),
         })),
     };
@@ -72,17 +69,19 @@ const FormBudget = ({
     if (budget && firstPass) {
       // Preencher o formData com os valores do orçamento existente
       const existingData: { [key: string]: string } = {
-        ano: budget.ano.toString(),
+        ano: String(budget.ano),
       };
       budget.valores?.forEach((valor) => {
-        existingData[valor.item.descricao] = valor.valor.toString();
+        // O codigo do item contém o categoriaId (UUID da categoria do Conta Azul)
+        const categoriaId = valor.item?.codigo;
+        if (categoriaId) {
+          existingData[categoriaId] = String(valor.valor);
+        }
       });
       setFormData(existingData);
       setFirstPass(false);
     }
   }, [budget, firstPass]);
-
-  console.log("Categorias formBudget: ", categorias);
 
   return (
     <>
@@ -90,9 +89,11 @@ const FormBudget = ({
         <div className="flex flex-col gap-4 m-4 w-3/4 mx-auto">
           <Label>Selecione o Ano</Label>
           <Select
+            key={formData.ano || "empty"}
             name="ano"
             onValueChange={(value) => setFormData({ ...formData, ano: value })}
-            value={`${formData.ano}`}
+            defaultValue={formData.ano}
+            value={formData.ano}
           >
             <SelectTrigger className="border-2 border-gray-200 rounded-md p-1 w-[180px]">
               <SelectValue placeholder="Selecione o Ano" />
@@ -121,10 +122,10 @@ const FormBudget = ({
                     <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
                     <Input
                       type="text"
-                      name={categoria.nome}
+                      name={categoria.id}
                       placeholder={categoria.nome}
                       onChange={handleChange}
-                      value={formData[categoria.nome] || ""}
+                      value={formData[categoria.id] || ""}
                     />
                   </div>
                 ))}
@@ -140,10 +141,10 @@ const FormBudget = ({
                     <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
                     <Input
                       type="text"
-                      name={categoria.nome}
+                      name={categoria.id}
                       placeholder={categoria.nome}
                       onChange={handleChange}
-                      value={formData[categoria.nome] || ""}
+                      value={formData[categoria.id] || ""}
                     />
                   </div>
                 ))}
