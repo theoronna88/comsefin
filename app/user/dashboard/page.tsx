@@ -40,9 +40,11 @@ import { PercentualCategoriasPie } from "@/app/_components/percentual-categorias
 import { fetchingDespesasComFiltros } from "@/app/_actions/despesa-actions";
 import { CategoryGroupManager } from "@/app/_components/drag-drop";
 import { GruposDespesasChart } from "@/app/_components/graphs/grupos-despesas-chart";
+import { OrcamentoVsRealizadoChart } from "@/app/_components/graphs/orcamento-vs-realizado-chart";
+import { fetchBudget } from "@/app/_actions/orcamento-actions";
+import { Orcamento } from "@/app/_lib/types";
 
 // TODO: Acrescentar os outros gráficos de despesas.
-// TODO: Refatorar os gráficos de receitas para usar um gráfico parecido com o de despesas.
 
 interface SelectedCategory {
   id: string | number;
@@ -78,6 +80,8 @@ export default function Page() {
   const [gruposDespesas, setGruposDespesas] = useState<GrupoDespesa[]>(() =>
     GRUPOS_DESPESAS_GRUPOPNG.map((g) => ({ ...g, categorias: [] }))
   );
+
+  const [budget, setBudget] = useState<Orcamento | null>(null);
 
   // Callback quando os grupos mudam
   const handleGroupsChange = useCallback((grupos: GrupoDespesa[]) => {
@@ -156,8 +160,20 @@ export default function Page() {
     setSearching(false);
   }
 
+  async function fetchBudgetData(year: string) {
+    fetchBudget(Number(year))
+      .then((data) => {
+        setBudget(data);
+      })
+      .catch((error) => {
+        console.error("Erro ao buscar orçamento:", error);
+      });
+  }
+
   async function handleOnDespesasClick() {
     setSearching(true);
+
+    fetchBudgetData(year);
 
     let inicioStr = "";
     let terminoStr = "";
@@ -185,6 +201,8 @@ export default function Page() {
     });
     setTotaisDespesas(temp);
     setSearching(false);
+
+    console.log("Budget state after fetch:", budget);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -394,6 +412,19 @@ export default function Page() {
                       />
                     )}
 */}
+
+                    {/* Neste trecho precio renderizar o gráfico de despesas agrupadas
+                      pegar as categorias do grupo e mostrar em barras comparando com 
+                      o orçamento daquela categoria que está armazenado no estado budget.
+                    */}
+                    <OrcamentoVsRealizadoChart
+                      grupos={gruposDespesas}
+                      totaisDespesas={totaisDespesas}
+                      budget={budget}
+                      searching={searching}
+                      year={year}
+                    />
+
                     {/* Fim do gráfico de despesas */}
                   </CardContent>
                 </Card>

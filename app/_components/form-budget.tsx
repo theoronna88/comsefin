@@ -9,10 +9,11 @@ import {
   SelectGroup,
   SelectItem,
   SelectValue,
+  SelectTrigger,
 } from "./ui/select";
-import { SelectTrigger } from "@radix-ui/react-select";
-import { saveBudget } from "../api/api";
+import { saveBudget } from "@/app/api/orcamento";
 import { toast } from "sonner";
+import { Card, CardContent } from "./ui/card";
 import type { Categoria, Orcamento } from "@/app/_lib/types";
 
 const FormBudget = ({
@@ -35,13 +36,17 @@ const FormBudget = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Mapear os IDs das categorias para seus nomes
+    const categoriaMap = new Map(categorias.map((cat) => [cat.id, cat.nome]));
+
     const data = {
       id: budget?.id,
       ano: formData?.ano,
       categorias: Object.entries(formData)
         .filter(([key]) => key !== "ano")
-        .map(([nome, valor]) => ({
-          nome,
+        .map(([categoriaId, valor]) => ({
+          categoriaId,
+          nome: categoriaMap.get(categoriaId) || categoriaId,
           valor: Number(valor.replace(",", ".")),
         })),
     };
@@ -64,11 +69,13 @@ const FormBudget = ({
     if (budget && firstPass) {
       // Preencher o formData com os valores do orçamento existente
       const existingData: { [key: string]: string } = {
-        ano: budget.ano.toString(),
+        ano: String(budget.ano),
       };
       budget.valores?.forEach((valor) => {
-        if (valor.item?.descricao) {
-          existingData[valor.item.descricao] = valor.valor.toString();
+        // O codigo do item contém o categoriaId (UUID da categoria do Conta Azul)
+        const categoriaId = valor.item?.codigo;
+        if (categoriaId) {
+          existingData[categoriaId] = String(valor.valor);
         }
       });
       setFormData(existingData);
@@ -82,9 +89,11 @@ const FormBudget = ({
         <div className="flex flex-col gap-4 m-4 w-3/4 mx-auto">
           <Label>Selecione o Ano</Label>
           <Select
+            key={formData.ano || "empty"}
             name="ano"
             onValueChange={(value) => setFormData({ ...formData, ano: value })}
-            value={`${formData.ano}`}
+            defaultValue={formData.ano}
+            value={formData.ano}
           >
             <SelectTrigger className="border-2 border-gray-200 rounded-md p-1 w-[180px]">
               <SelectValue placeholder="Selecione o Ano" />
@@ -103,18 +112,44 @@ const FormBudget = ({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {categorias.map((categoria) => (
-            <div key={categoria.id}>
-              <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
-              <Input
-                type="text"
-                name={categoria.nome}
-                placeholder={categoria.nome}
-                onChange={handleChange}
-                value={formData[categoria.nome] || ""}
-              />
-            </div>
-          ))}
+          <Card>
+            <CardContent className="bg-blue-50">
+              {/* Receitas */}
+              {categorias
+                .filter((cat) => cat.tipo === "RECEITA")
+                .map((categoria) => (
+                  <div key={categoria.id}>
+                    <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                    <Input
+                      type="text"
+                      name={categoria.id}
+                      placeholder={categoria.nome}
+                      onChange={handleChange}
+                      value={formData[categoria.id] || ""}
+                    />
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="bg-red-50">
+              {/* Despesas */}
+              {categorias
+                .filter((cat) => cat.tipo === "DESPESA")
+                .map((categoria) => (
+                  <div key={categoria.id}>
+                    <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                    <Input
+                      type="text"
+                      name={categoria.id}
+                      placeholder={categoria.nome}
+                      onChange={handleChange}
+                      value={formData[categoria.id] || ""}
+                    />
+                  </div>
+                ))}
+            </CardContent>
+          </Card>
         </div>
         <div className="flex justify-end w-3/4 mx-auto">
           <Button type="submit" className="justify-end">

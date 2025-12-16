@@ -13,10 +13,11 @@ export async function getDespesas(
     tamanho_pagina: "5000",
     data_vencimento_de: dataVencimentoDe,
     data_vencimento_ate: dataVencimentoAte,
+    status: "ACQUITTED",
   };
 
-  console.log("getDespesas - categorias:", categorias);
-  console.log("getDespesas - centrosDeCusto:", centrosDeCusto);
+  // console.log("getDespesas - categorias:", categorias);
+  // console.log("getDespesas - centrosDeCusto:", centrosDeCusto);
 
   if (categorias && categorias.length > 0) {
     queryParams.ids_categorias = categorias;
@@ -46,7 +47,7 @@ export async function getDespesas(
 
   const data = await response.json();
 
-  console.log("getDespesas - data:", data);
+  // console.log("getDespesas - data:", data);
 
   return data;
 }
