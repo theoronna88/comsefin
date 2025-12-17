@@ -3,6 +3,7 @@
 import { signOut } from "next-auth/react";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
+import { useAsyncAction } from "../_hooks/use-async-action";
 
 interface LogoutButtonProps {
   variant?:
@@ -21,14 +22,18 @@ export function LogoutButton({
   size = "sm",
   className,
 }: LogoutButtonProps) {
-  const handleLogout = async () => {
-    // Limpar cookie local
-    document.cookie =
-      "TokenContaAzul=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  const { execute, isLoading } = useAsyncAction();
 
-    await signOut({
-      callbackUrl: "/login",
-      redirect: true,
+  const handleLogout = () => {
+    execute(async () => {
+      // Limpar cookie local
+      document.cookie =
+        "TokenContaAzul=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+      await signOut({
+        callbackUrl: "/login",
+        redirect: true,
+      });
     });
   };
 
@@ -37,10 +42,11 @@ export function LogoutButton({
       variant={variant}
       size={size}
       onClick={handleLogout}
+      disabled={isLoading}
       className={className}
     >
       <LogOut className="h-4 w-4 mr-2" />
-      Sair
+      {isLoading ? "Saindo..." : "Sair"}
     </Button>
   );
 }

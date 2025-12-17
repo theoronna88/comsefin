@@ -15,31 +15,33 @@ import { MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import type { Categoria, Orcamento } from "@/app/_lib/types";
+import { useAsyncAction } from "@/app/_hooks/use-async-action";
 
 const BudgetActions = ({ budget }: { budget: Orcamento }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const { execute, isLoading } = useAsyncAction();
 
   const handleClose = () => {
     setIsOpen(false);
     setIsEdit(false);
   };
 
-  const handleDelete = async () => {
-    // Chama a função de exclusão do orçamento
-    await deleteBudget(budget.id)
-      .then(() => {
+  const handleDelete = () => {
+    execute(async () => {
+      try {
+        await deleteBudget(budget.id);
         toast.success("Orçamento excluído com sucesso!");
-      })
-      .catch((error) => {
+        
+        setTimeout(() => {
+          window.location.href = "/user/budget";
+        }, 1500);
+      } catch (error) {
         console.error("Error deleting budget:", error);
         toast.error("Erro ao excluir o orçamento.");
-      });
-
-    setTimeout(() => {
-      window.location.href = "/user/budget";
-    }, 1500);
+      }
+    });
   };
 
   useEffect(() => {
@@ -93,8 +95,9 @@ const BudgetActions = ({ budget }: { budget: Orcamento }) => {
               onClick={() => {
                 handleDelete();
               }}
+              disabled={isLoading}
             >
-              Excluir
+              {isLoading ? "Excluindo..." : "Excluir"}
             </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>

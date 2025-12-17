@@ -15,6 +15,7 @@ import { saveBudget } from "@/app/api/orcamento";
 import { toast } from "sonner";
 import { Card, CardContent } from "./ui/card";
 import type { Categoria, Orcamento } from "@/app/_lib/types";
+import { useAsyncAction } from "../_hooks/use-async-action";
 
 const FormBudget = ({
   categorias,
@@ -27,6 +28,7 @@ const FormBudget = ({
 }) => {
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const [firstPass, setFirstPass] = useState(true);
+  const { execute, isLoading } = useAsyncAction();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,33 +38,35 @@ const FormBudget = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Mapear os IDs das categorias para seus nomes
-    const categoriaMap = new Map(categorias.map((cat) => [cat.id, cat.nome]));
+    execute(async () => {
+      // Mapear os IDs das categorias para seus nomes
+      const categoriaMap = new Map(categorias.map((cat) => [cat.id, cat.nome]));
 
-    const data = {
-      id: budget?.id,
-      ano: formData?.ano,
-      categorias: Object.entries(formData)
-        .filter(([key]) => key !== "ano")
-        .map(([categoriaId, valor]) => ({
-          categoriaId,
-          nome: categoriaMap.get(categoriaId) || categoriaId,
-          valor: Number(valor.replace(",", ".")),
-        })),
-    };
-    saveBudget(data)
-      .then(() => {
+      const data = {
+        id: budget?.id,
+        ano: formData?.ano,
+        categorias: Object.entries(formData)
+          .filter(([key]) => key !== "ano")
+          .map(([categoriaId, valor]) => ({
+            categoriaId,
+            nome: categoriaMap.get(categoriaId) || categoriaId,
+            valor: Number(valor.replace(",", ".")),
+          })),
+      };
+      
+      try {
+        await saveBudget(data);
         toast.success("Orçamento salvo com sucesso!");
         setFormData({});
         window.location.href = "/user/budget";
-
         onClose();
-      })
-      .catch((error) => {
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
         toast.error("Erro ao salvar o orçamento. ", {
-          description: error.message,
+          description: errorMessage,
         });
-      });
+      }
+    });
   };
 
   useEffect(() => {
@@ -152,8 +156,8 @@ const FormBudget = ({
           </Card>
         </div>
         <div className="flex justify-end w-3/4 mx-auto">
-          <Button type="submit" className="justify-end">
-            Salvar
+          <Button type="submit" className="justify-end" disabled={isLoading}>
+            {isLoading ? "Salvando..." : "Salvar"}
           </Button>
         </div>
       </form>

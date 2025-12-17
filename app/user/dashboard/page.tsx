@@ -43,6 +43,7 @@ import { GruposDespesasChart } from "@/app/_components/graphs/grupos-despesas-ch
 import { OrcamentoVsRealizadoChart } from "@/app/_components/graphs/orcamento-vs-realizado-chart";
 import { fetchBudget } from "@/app/_actions/orcamento-actions";
 import { Orcamento } from "@/app/_lib/types";
+import { useAsyncAction } from "@/app/_hooks/use-async-action";
 
 // TODO: Acrescentar os outros gráficos de despesas.
 
@@ -82,6 +83,10 @@ export default function Page() {
   );
 
   const [budget, setBudget] = useState<Orcamento | null>(null);
+  
+  // Hooks para gerenciar loading dos botões
+  const { execute: executeReceitas, isLoading: isLoadingReceitas } = useAsyncAction();
+  const { execute: executeDespesas, isLoading: isLoadingDespesas } = useAsyncAction();
 
   // Callback quando os grupos mudam
   const handleGroupsChange = useCallback((grupos: GrupoDespesa[]) => {
@@ -130,34 +135,37 @@ export default function Page() {
       toast.error("Selecione ao menos uma categoria de receita.");
       return;
     }
-    setSearching(true);
+    
+    executeReceitas(async () => {
+      setSearching(true);
 
-    let inicioStr = "";
-    let terminoStr = "";
-    let inicioStrPrev = "";
-    let terminoStrPrev = "";
-    if (year) {
-      inicioStr = `${year}-01-01`;
-      terminoStr = `${year}-12-31`;
-      inicioStrPrev = `${Number(year) - 1}-01-01`;
-      terminoStrPrev = `${Number(year) - 1}-12-31`;
-    } else {
-      toast.error("Selecione o ano primeiro.");
-      return;
-    }
+      let inicioStr = "";
+      let terminoStr = "";
+      let inicioStrPrev = "";
+      let terminoStrPrev = "";
+      if (year) {
+        inicioStr = `${year}-01-01`;
+        terminoStr = `${year}-12-31`;
+        inicioStrPrev = `${Number(year) - 1}-01-01`;
+        terminoStrPrev = `${Number(year) - 1}-12-31`;
+      } else {
+        toast.error("Selecione o ano primeiro.");
+        return;
+      }
 
-    const temp = await fetchingReceitasComFiltros({
-      selectedReceitasCategories: selectedReceitasCategories.map((c) => ({
-        id: String(c.id),
-        nome: c.nome,
-      })),
-      inicioStr,
-      terminoStr,
-      inicioStrPrev,
-      terminoStrPrev,
+      const temp = await fetchingReceitasComFiltros({
+        selectedReceitasCategories: selectedReceitasCategories.map((c) => ({
+          id: String(c.id),
+          nome: c.nome,
+        })),
+        inicioStr,
+        terminoStr,
+        inicioStrPrev,
+        terminoStrPrev,
+      });
+      setTotaisReceita(temp);
+      setSearching(false);
     });
-    setTotaisReceita(temp);
-    setSearching(false);
   }
 
   async function fetchBudgetData(year: string) {
@@ -171,38 +179,40 @@ export default function Page() {
   }
 
   async function handleOnDespesasClick() {
-    setSearching(true);
+    executeDespesas(async () => {
+      setSearching(true);
 
-    fetchBudgetData(year);
+      fetchBudgetData(year);
 
-    let inicioStr = "";
-    let terminoStr = "";
-    let inicioStrPrev = "";
-    let terminoStrPrev = "";
-    if (year) {
-      inicioStr = `${year}-01-01`;
-      terminoStr = `${year}-12-31`;
-      inicioStrPrev = `${Number(year) - 1}-01-01`;
-      terminoStrPrev = `${Number(year) - 1}-12-31`;
-    } else {
-      toast.error("Selecione o ano primeiro.");
-      return;
-    }
+      let inicioStr = "";
+      let terminoStr = "";
+      let inicioStrPrev = "";
+      let terminoStrPrev = "";
+      if (year) {
+        inicioStr = `${year}-01-01`;
+        terminoStr = `${year}-12-31`;
+        inicioStrPrev = `${Number(year) - 1}-01-01`;
+        terminoStrPrev = `${Number(year) - 1}-12-31`;
+      } else {
+        toast.error("Selecione o ano primeiro.");
+        return;
+      }
 
-    const temp = await fetchingDespesasComFiltros({
-      selectedDespesasCategories: selectedDespesasCategories.map((c) => ({
-        id: String(c.id),
-        nome: c.nome,
-      })),
-      inicioStr,
-      terminoStr,
-      inicioStrPrev,
-      terminoStrPrev,
+      const temp = await fetchingDespesasComFiltros({
+        selectedDespesasCategories: selectedDespesasCategories.map((c) => ({
+          id: String(c.id),
+          nome: c.nome,
+        })),
+        inicioStr,
+        terminoStr,
+        inicioStrPrev,
+        terminoStrPrev,
+      });
+      setTotaisDespesas(temp);
+      setSearching(false);
+
+      console.log("Budget state after fetch:", budget);
     });
-    setTotaisDespesas(temp);
-    setSearching(false);
-
-    console.log("Budget state after fetch:", budget);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -301,10 +311,10 @@ export default function Page() {
                       <Button
                         variant="default"
                         onClick={handleOnClick}
-                        disabled={selectedReceitasCategories.length === 0}
+                        disabled={selectedReceitasCategories.length === 0 || isLoadingReceitas}
                       >
                         <SearchIcon className="mr-2 h-4 w-4" />
-                        Buscar Receitas
+                        {isLoadingReceitas ? "Buscando..." : "Buscar Receitas"}
                       </Button>
                       {selectedReceitasCategories.length > 0 && (
                         <span className="text-sm text-muted-foreground">
@@ -381,10 +391,10 @@ export default function Page() {
                       <Button
                         variant="default"
                         onClick={handleOnDespesasClick}
-                        disabled={selectedDespesasCategories.length === 0}
+                        disabled={selectedDespesasCategories.length === 0 || isLoadingDespesas}
                       >
                         <SearchIcon className="mr-2 h-4 w-4" />
-                        Buscar Despesas
+                        {isLoadingDespesas ? "Buscando..." : "Buscar Despesas"}
                       </Button>
                       {selectedDespesasCategories.length > 0 && (
                         <span className="text-sm text-muted-foreground">
