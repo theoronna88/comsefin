@@ -10,7 +10,6 @@ import { useEffect, useCallback, useRef } from "react";
  */
 export function useContaAzulAuth() {
   const { data: session, status, update } = useSession();
-  const router = useRouter();
   const isLoggingOut = useRef(false);
 
   // Função para forçar logout

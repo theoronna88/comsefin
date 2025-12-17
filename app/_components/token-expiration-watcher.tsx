@@ -4,8 +4,9 @@ import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useCallback } from "react";
 
-// Intervalo de verificação do token (30 segundos)
-const CHECK_INTERVAL = 30 * 1000;
+// Intervalo de verificação do token (5 minutos)
+// Mais adequado para Vercel free tier e reduz custos
+const CHECK_INTERVAL = 5 * 60 * 1000;
 
 // Páginas públicas que não precisam de verificação
 const PUBLIC_PATHS = ["/", "/login", "/conta-azul", "/conta-azul/callback"];
@@ -15,8 +16,9 @@ const PUBLIC_PATHS = ["/", "/login", "/conta-azul", "/conta-azul/callback"];
  * e redireciona automaticamente para o login quando necessário.
  *
  * Este componente:
- * - Verifica o token periodicamente (a cada 30 segundos)
+ * - Verifica o token periodicamente (a cada 5 minutos)
  * - Verifica quando a janela ganha foco (usuário volta à aba)
+ * - Verifica quando a aba fica visível novamente
  * - Faz logout automático quando o token expira ou há erro
  */
 export function TokenExpirationWatcher({
