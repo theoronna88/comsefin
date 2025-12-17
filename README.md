@@ -92,7 +92,24 @@ NEXTAUTH_SECRET="your-super-secret-key"
 NEXT_CLIENT_ID="your-conta-azul-client-id"
 NEXT_CLIENT_SECRET="your-conta-azul-client-secret"
 NEXT_REDIRECT_URI="http://localhost:3000/conta-azul/callback"
+
+# Token Expiration (opcional - apenas para testes)
+# Define o tempo de expiração do token em minutos
+# Padrão: 60 minutos (1 hora)
+# Para testar expiração rápida, use um valor menor (ex: 5 minutos)
+# TOKEN_EXPIRATION_MINUTES=5
 ```
+
+#### Testing Token Expiration
+
+To test the automatic token expiration and logout functionality:
+
+1. Add `TOKEN_EXPIRATION_MINUTES=5` to your `.env.local` file
+2. Restart the development server
+3. Login to the application
+4. Wait 5 minutes and observe the automatic logout and redirect to login page
+
+**Note:** The token expiration watcher checks every 5 minutes and also when the window gains focus or becomes visible.
 
 ---
 
@@ -188,4 +205,21 @@ NEXTAUTH_SECRET="sua-chave-super-secreta"
 NEXT_CLIENT_ID="seu-client-id-da-conta-azul"
 NEXT_CLIENT_SECRET="seu-client-secret-da-conta-azul"
 NEXT_REDIRECT_URI="http://localhost:3000/conta-azul/callback"
+
+# Expiração do Token (opcional - apenas para testes)
+# Define o tempo de expiração do token em minutos
+# Padrão: 60 minutos (1 hora)
+# Para testar expiração rápida, use um valor menor (ex: 5 minutos)
+# TOKEN_EXPIRATION_MINUTES=5
 ```
+
+#### Testando a Expiração do Token
+
+Para testar a funcionalidade de expiração automática do token e logout:
+
+1. Adicione `TOKEN_EXPIRATION_MINUTES=5` ao seu arquivo `.env.local`
+2. Reinicie o servidor de desenvolvimento
+3. Faça login na aplicação
+4. Aguarde 5 minutos e observe o logout automático e redirecionamento para a tela de login
+
+**Nota:** O verificador de expiração do token checa a cada 5 minutos e também quando a janela ganha foco ou fica visível.

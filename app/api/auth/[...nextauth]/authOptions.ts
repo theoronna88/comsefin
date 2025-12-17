@@ -39,7 +39,26 @@ declare module "next-auth/jwt" {
 }
 
 // Token da Conta Azul expira em 1 hora - forçamos logout para refazer autenticação
-const TOKEN_EXPIRATION_TIME = 60 * 60 * 1000; // 1 hora em milissegundos
+// IMPORTANTE: Para testar a expiração em desenvolvimento, defina TOKEN_EXPIRATION_MINUTES no .env.local
+// Exemplo: TOKEN_EXPIRATION_MINUTES=5 para expirar em 5 minutos
+const getTokenExpirationTime = () => {
+  const envMinutes = process.env.TOKEN_EXPIRATION_MINUTES;
+
+  if (envMinutes) {
+    const minutes = parseInt(envMinutes, 10);
+    if (!isNaN(minutes) && minutes > 0) {
+      console.log(
+        `⚠️  [AUTH] Usando tempo de expiração personalizado: ${minutes} minutos`
+      );
+      return minutes * 60 * 1000; // Converte minutos para milissegundos
+    }
+  }
+
+  // Padrão: 1 hora (60 minutos)
+  return 60 * 60 * 1000;
+};
+
+const TOKEN_EXPIRATION_TIME = getTokenExpirationTime();
 
 export const authOptions = {
   providers: [
