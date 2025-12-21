@@ -2,6 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { User } from "next-auth";
+import { getContaFinanceira } from "@/app/api/conta-financeira";
 
 // Estende os tipos do NextAuth para incluir os tokens do Conta Azul
 declare module "next-auth" {
@@ -74,6 +75,16 @@ export const authOptions = {
         // Valida os tokens recebidos do callback do Conta Azul
         if (!credentials?.accessToken || !credentials?.refreshToken) {
           console.error("Tokens não fornecidos");
+          return null;
+        }
+
+        const contaFinanceira = await getContaFinanceira({
+          nome: process.env.NEXT_NOME_CONTA_FINANCEIRA,
+          accessToken: credentials.accessToken,
+        });
+
+        if (!contaFinanceira) {
+          console.error("Falha ao obter dados da conta financeira");
           return null;
         }
 

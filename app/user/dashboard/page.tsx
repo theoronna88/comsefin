@@ -83,10 +83,12 @@ export default function Page() {
   );
 
   const [budget, setBudget] = useState<Orcamento | null>(null);
-  
+
   // Hooks para gerenciar loading dos botões
-  const { execute: executeReceitas, isLoading: isLoadingReceitas } = useAsyncAction();
-  const { execute: executeDespesas, isLoading: isLoadingDespesas } = useAsyncAction();
+  const { execute: executeReceitas, isLoading: isLoadingReceitas } =
+    useAsyncAction();
+  const { execute: executeDespesas, isLoading: isLoadingDespesas } =
+    useAsyncAction();
 
   // Callback quando os grupos mudam
   const handleGroupsChange = useCallback((grupos: GrupoDespesa[]) => {
@@ -135,7 +137,7 @@ export default function Page() {
       toast.error("Selecione ao menos uma categoria de receita.");
       return;
     }
-    
+
     executeReceitas(async () => {
       setSearching(true);
 
@@ -311,7 +313,10 @@ export default function Page() {
                       <Button
                         variant="default"
                         onClick={handleOnClick}
-                        disabled={selectedReceitasCategories.length === 0 || isLoadingReceitas}
+                        disabled={
+                          selectedReceitasCategories.length === 0 ||
+                          isLoadingReceitas
+                        }
                       >
                         <SearchIcon className="mr-2 h-4 w-4" />
                         {isLoadingReceitas ? "Buscando..." : "Buscar Receitas"}
@@ -391,7 +396,10 @@ export default function Page() {
                       <Button
                         variant="default"
                         onClick={handleOnDespesasClick}
-                        disabled={selectedDespesasCategories.length === 0 || isLoadingDespesas}
+                        disabled={
+                          selectedDespesasCategories.length === 0 ||
+                          isLoadingDespesas
+                        }
                       >
                         <SearchIcon className="mr-2 h-4 w-4" />
                         {isLoadingDespesas ? "Buscando..." : "Buscar Despesas"}

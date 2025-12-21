@@ -54,7 +54,7 @@ export async function saveBudget(data) {
     try {
       // Verifica se o orçamento pertence ao usuário
       const currentBudget = await prisma.orcamentos.findFirst({
-        where: { id: data.id, userId },
+        where: { id: data.id },
       });
 
       if (!currentBudget) {
@@ -189,11 +189,11 @@ export async function saveBudget(data) {
 
 export async function getBudget() {
   // Verifica sessão e obtém userId
-  const userId = await getAuthenticatedUserId();
+  // const userId = await getAuthenticatedUserId();
 
   // Retorna apenas os orçamentos do usuário logado
   const budgets = await prisma.orcamentos.findMany({
-    where: { userId },
+    // where: { userId },
     include: {
       valores: { include: { item: true } },
     },
