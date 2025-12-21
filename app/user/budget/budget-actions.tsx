@@ -33,7 +33,7 @@ const BudgetActions = ({ budget }: { budget: Orcamento }) => {
       try {
         await deleteBudget(budget.id);
         toast.success("Orçamento excluído com sucesso!");
-        
+
         setTimeout(() => {
           window.location.href = "/user/budget";
         }, 1500);

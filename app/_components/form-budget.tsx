@@ -53,7 +53,7 @@ const FormBudget = ({
             valor: Number(valor.replace(",", ".")),
           })),
       };
-      
+
       try {
         await saveBudget(data);
         toast.success("Orçamento salvo com sucesso!");
@@ -61,7 +61,8 @@ const FormBudget = ({
         window.location.href = "/user/budget";
         onClose();
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+        const errorMessage =
+          error instanceof Error ? error.message : "Erro desconhecido";
         toast.error("Erro ao salvar o orçamento. ", {
           description: errorMessage,
         });

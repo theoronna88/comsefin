@@ -2,6 +2,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { User } from "next-auth";
+import { getContaFinanceira } from "@/app/api/conta-financeira";
 
 // Estende os tipos do NextAuth para incluir os tokens do Conta Azul
 declare module "next-auth" {
@@ -16,6 +17,7 @@ declare module "next-auth" {
     refreshToken?: string;
     accessTokenExpires?: number;
     error?: string;
+    contaFinanceira?: string;
   }
 
   interface User {
@@ -25,6 +27,7 @@ declare module "next-auth" {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
+    contaFinanceira?: string | null;
   }
 }
 
@@ -35,6 +38,7 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     accessTokenExpires?: number;
     error?: string;
+    contaFinanceira?: string;
   }
 }
 
@@ -77,11 +81,24 @@ export const authOptions = {
           return null;
         }
 
+        const contaFinanceira = await getContaFinanceira({
+          nome: process.env.NEXT_NOME_CONTA_FINANCEIRA,
+          accessToken: credentials.accessToken,
+        });
+
+        if (!contaFinanceira) {
+          console.error("Falha ao obter dados da conta financeira");
+          return null;
+        }
+
+        console.log("Conta Financeira obtida com sucesso:", contaFinanceira);
+
         // Retorna o usuário com os tokens
         return {
           id: "conta-azul-user",
           name: "Usuário Conta Azul",
           email: null,
+          contaFinanceira: contaFinanceira,
           accessToken: credentials.accessToken,
           refreshToken: credentials.refreshToken,
           expiresIn: Number(credentials.expiresIn) || 3600,
@@ -104,6 +121,7 @@ export const authOptions = {
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
           accessTokenExpires: Date.now() + TOKEN_EXPIRATION_TIME,
+          contaFinanceira: user.contaFinanceira,
         };
       }
 
@@ -124,6 +142,7 @@ export const authOptions = {
       session.refreshToken = token.refreshToken;
       session.accessTokenExpires = token.accessTokenExpires;
       session.error = token.error;
+      session.contaFinanceira = token.contaFinanceira;
 
       if (token.id) {
         session.user.id = token.id;
