@@ -3,6 +3,8 @@ import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { User } from "next-auth";
 import { getContaFinanceira } from "@/app/api/conta-financeira";
+import { decode } from "punycode";
+import { jwtDecode } from "jwt-decode";
 
 // Estende os tipos do NextAuth para incluir os tokens do Conta Azul
 declare module "next-auth" {
@@ -32,6 +34,8 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
+    name?: string | null;
+    email?: string | null;
     accessToken?: string;
     refreshToken?: string;
     accessTokenExpires?: number;
@@ -40,8 +44,6 @@ declare module "next-auth/jwt" {
 }
 
 // Token da Conta Azul expira em 1 hora - forçamos logout para refazer autenticação
-// IMPORTANTE: Para testar a expiração em desenvolvimento, defina TOKEN_EXPIRATION_MINUTES no .env.local
-// Exemplo: TOKEN_EXPIRATION_MINUTES=5 para expirar em 5 minutos
 const getTokenExpirationTime = () => {
   const envMinutes = process.env.TOKEN_EXPIRATION_MINUTES;
 
@@ -88,11 +90,13 @@ export const authOptions = {
           return null;
         }
 
+        const decoded = jwtDecode<any>(credentials.accessToken);
+
         // Retorna o usuário com os tokens
         return {
-          id: "conta-azul-user",
-          name: "Usuário Conta Azul",
-          email: null,
+          id: decoded.sub,
+          name: decoded.username ? decoded.username.split("@")[0] : null, // Usa a parte antes do @ como nome
+          email: decoded.username || null,
           accessToken: credentials.accessToken,
           refreshToken: credentials.refreshToken,
           expiresIn: Number(credentials.expiresIn) || 3600,
@@ -112,6 +116,8 @@ export const authOptions = {
         return {
           ...token,
           id: user.id,
+          name: user.name,
+          email: user.email,
           accessToken: user.accessToken,
           refreshToken: user.refreshToken,
           accessTokenExpires: Date.now() + TOKEN_EXPIRATION_TIME,
@@ -138,6 +144,12 @@ export const authOptions = {
 
       if (token.id) {
         session.user.id = token.id;
+      }
+      if (token.name) {
+        session.user.name = token.name;
+      }
+      if (token.email) {
+        session.user.email = token.email;
       }
 
       return session;
