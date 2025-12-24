@@ -1,9 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import { JWT } from "next-auth/jwt";
+import { DecodedJwt, JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { User } from "next-auth";
 import { getContaFinanceira } from "@/app/api/conta-financeira";
-import { decode } from "punycode";
 import { jwtDecode } from "jwt-decode";
 
 // Estende os tipos do NextAuth para incluir os tokens do Conta Azul
@@ -40,6 +39,11 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     accessTokenExpires?: number;
     error?: string;
+  }
+
+  interface DecodedJwt {
+    sub: string;
+    username: string;
   }
 }
 
@@ -90,7 +94,7 @@ export const authOptions = {
           return null;
         }
 
-        const decoded = jwtDecode<any>(credentials.accessToken);
+        const decoded = jwtDecode<DecodedJwt>(credentials.accessToken);
 
         // Retorna o usuário com os tokens
         return {

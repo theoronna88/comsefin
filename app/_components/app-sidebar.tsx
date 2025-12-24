@@ -8,17 +8,14 @@ import {
 } from "lucide-react";
 
 import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "./ui/sidebar";
-import { useSession } from "next-auth/react";
 
 const data2 = {
   user: {
@@ -60,24 +57,6 @@ const data2 = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // recuperar dados do usuário pela sessao
-  const { data: session, status } = useSession();
-  const [userData, setUserData] = React.useState(null);
-
-  React.useEffect(() => {
-    console.log("Sessão atualizada:", session);
-    console.log("Status da sessão:", status);
-
-    if (status === "authenticated" && session) {
-      // Aqui você pode extrair os dados do usuário da sessão
-      const user = session;
-      setUserData(user);
-      console.log("Dados da sessão:", user);
-    } else {
-      setUserData(null);
-    }
-  }, [status, session]);
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
