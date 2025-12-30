@@ -1,0 +1,59 @@
+"use server";
+
+import { prisma } from "../_lib/prisma";
+
+interface GrupoComCategorias {
+  groupId: string | null; // ID do grupo estático ou null se desagrupado
+  contaAzulCategoryIds: string[];
+}
+
+export async function salvarOrganizacaoCategorias(
+  grupos: GrupoComCategorias[]
+) {
+  try {
+    const createOps: any[] = [];
+
+    const deleteOp = prisma.categoriaAgrupada.deleteMany({});
+
+    for (const grupo of grupos) {
+      if (grupo.groupId) {
+        for (let i = 0; i < grupo.contaAzulCategoryIds.length; i++) {
+          const catId = grupo.contaAzulCategoryIds[i];
+
+          createOps.push(
+            prisma.categoriaAgrupada.create({
+              data: {
+                contaAzulCategoryId: catId,
+                grupoId: grupo.groupId,
+                ordem: i,
+              },
+            })
+          );
+        }
+      }
+    }
+
+    await prisma.$transaction([deleteOp, ...createOps]);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao salvar organização das categorias:", error);
+    return {
+      success: false,
+      message: "Não foi possível salvar a organização.",
+    };
+  }
+}
+
+export async function resetarOrganizacaoCategorias() {
+  try {
+    await prisma.categoriaAgrupada.deleteMany({});
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao resetar organização:", error);
+    return {
+      success: false,
+      message: "Não foi possível resetar a organização.",
+    };
+  }
+}
