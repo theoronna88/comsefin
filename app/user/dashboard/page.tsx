@@ -44,6 +44,7 @@ import { OrcamentoVsRealizadoChart } from "@/app/_components/graphs/orcamento-vs
 import { fetchBudget } from "@/app/_actions/orcamento-actions";
 import { Orcamento } from "@/app/_lib/types";
 import { useAsyncAction } from "@/app/_hooks/use-async-action";
+import { getOrganizacaoCategorias } from "@/app/_actions/categoria-actions";
 
 // TODO: Acrescentar os outros gráficos de despesas.
 
@@ -112,10 +113,45 @@ export default function Page() {
 
     const fetchCategorias = async () => {
       try {
-        const res = await getCategorias("RECEITA");
-        const res2 = await getCategorias("DESPESA");
-        setCategoriasReceita(res.itens);
-        setCategoriasDespesa(res2.itens);
+        const [resReceitas, resDespesas, organizacaoSalva] = await Promise.all([
+          getCategorias("RECEITA"),
+          getCategorias("DESPESA"),
+          getOrganizacaoCategorias(),
+        ]);
+
+        setCategoriasReceita(resReceitas.itens);
+        setCategoriasDespesa(resDespesas.itens);
+
+        // Monta os grupos com a organização salva do banco
+        if (organizacaoSalva.length > 0) {
+          const gruposComCategorias = GRUPOS_DESPESAS_GRUPOPNG.map((grupo) => {
+            const categoriasDoGrupo = organizacaoSalva
+              .filter((org) => org.grupoId === grupo.id)
+              .sort((a, b) => a.ordem - b.ordem)
+              .map((org) => {
+                const categoria = resDespesas.itens.find(
+                  (cat: Categoria) => cat.id === org.contaAzulCategoryId
+                );
+                return categoria;
+              })
+              .filter(Boolean) as Categoria[];
+
+            return {
+              ...grupo,
+              categorias: categoriasDoGrupo,
+            };
+          });
+
+          setGruposDespesas(gruposComCategorias);
+
+          // Atualiza as categorias selecionadas
+          const categoriasAgrupadas = gruposComCategorias.flatMap((g) =>
+            g.categorias.map((c) => ({ id: c.id, nome: c.nome }))
+          );
+          setSelectedDespesasCategories(categoriasAgrupadas);
+
+          console.log("[Dashboard] Organização carregada do banco:", gruposComCategorias);
+        }
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
       }

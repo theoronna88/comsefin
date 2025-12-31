@@ -101,3 +101,10 @@ model ValoresOrcamento {
   itemId String
   item   ItensOrcamento @relation(fields: [itemId], references: [id], onDelete: Restrict)
 }
+
+model CategoriaAgrupada {
+  id                  String @id @default(cuid())
+  contaAzulCategoryId String
+  grupoId             String
+  ordem               Int
+}
