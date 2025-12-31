@@ -1,49 +1,31 @@
-"use client";
 import { getCategorias } from "@/app/api/api";
-import { useEffect, useState } from "react";
-import type { Categoria } from "@/app/_lib/types";
+import { getOrganizacaoCategorias } from "@/app/_actions/categoria-actions";
+import { CategoryGroupManager } from "@/app/_components/drag-drop/category-group-manager";
 
-const Categorias = () => {
-  const [listCategorias, setCategorias] = useState<Categoria[]>([]);
+export default async function CategoriasPage() {
+  const [categoriasResponse, organizacaoSalva] = await Promise.all([
+    getCategorias(),
+    getOrganizacaoCategorias(),
+  ]);
 
-  useEffect(() => {
-    if (listCategorias.length === 0) {
-      getCategorias()
-        .then((res) => {
-          setCategorias(res.itens);
-        })
-        .catch((error) => {
-          console.error("Erro ao buscar centros de custo:", error);
-        });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const categorias = categoriasResponse.itens;
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-4 md:gap-8 md:p-8">
-          {listCategorias.map((categoria) => (
-            <>
-              <span
-                key={categoria.id}
-                className="text-lg font-semibold"
-              >{`${categoria.tipo} - ${categoria.nome}`}</span>
-              {/* 
-            
-            <ListingCards
-                key={categoria.id}
-                description={categoria.tipo}
-                value={categoria.nome}
-              />
-            
-            */}
-            </>
-          ))}
+      <div className="@container/main flex flex-1 flex-col gap-6 p-4 md:p-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold">Organização de Categorias</h1>
+          <p className="text-muted-foreground">
+            Arraste as categorias para os grupos desejados. A organização é
+            salva automaticamente.
+          </p>
         </div>
+
+        <CategoryGroupManager
+          categorias={categorias}
+          organizacaoSalva={organizacaoSalva}
+        />
       </div>
     </div>
   );
-};
-
-export default Categorias;
+}

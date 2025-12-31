@@ -57,3 +57,24 @@ export async function resetarOrganizacaoCategorias() {
     };
   }
 }
+
+export interface CategoriaOrganizacaoSalva {
+  id: string;
+  contaAzulCategoryId: string;
+  grupoId: string;
+  ordem: number;
+}
+
+export async function getOrganizacaoCategorias(): Promise<
+  CategoriaOrganizacaoSalva[]
+> {
+  try {
+    const organizacao = await prisma.categoriaAgrupada.findMany({
+      orderBy: [{ grupoId: "asc" }, { ordem: "asc" }],
+    });
+    return organizacao;
+  } catch (error) {
+    console.error("Erro ao buscar organização das categorias:", error);
+    return [];
+  }
+}
