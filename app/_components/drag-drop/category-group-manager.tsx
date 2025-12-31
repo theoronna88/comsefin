@@ -8,9 +8,12 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  pointerWithin,
+  rectIntersection,
+  CollisionDetection,
 } from "@dnd-kit/core";
-import { useState, useCallback, useTransition } from "react";
+import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import {
   Categoria,
   GrupoDespesa,
@@ -54,7 +57,7 @@ export function CategoryGroupManager({
   onGroupsChange,
   initialGroups,
 }: CategoryGroupManagerProps) {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   // Constrói o estado inicial baseado na organização salva ou initialGroups (dashboard)
@@ -114,6 +117,17 @@ export function CategoryGroupManager({
     })
   );
 
+  // Estratégia de colisão customizada: tenta pointerWithin primeiro, depois rectIntersection
+  const collisionDetection: CollisionDetection = useCallback((args) => {
+    // Primeiro tenta pointerWithin (mais preciso quando o ponteiro está dentro da área)
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      return pointerCollisions;
+    }
+    // Fallback para rectIntersection (detecta sobreposição de retângulos)
+    return rectIntersection(args);
+  }, []);
+
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const categoria = active.data.current?.categoria as Categoria;
@@ -124,23 +138,40 @@ export function CategoryGroupManager({
 
   // Função auxiliar para salvar a organização no banco
   const persistirOrganizacao = useCallback(
-    (gruposAtualizados: GrupoDespesa[]) => {
+    async (gruposAtualizados: GrupoDespesa[]) => {
+      console.log("[persistirOrganizacao] Chamado");
+
       // Chama callback do dashboard se disponível
       onGroupsChange?.(gruposAtualizados);
 
-      // Persiste no banco (apenas se não estiver no modo dashboard)
-      if (!initialGroups) {
-        const payload = gruposAtualizados.map((grupo) => ({
-          groupId: grupo.id,
-          contaAzulCategoryIds: grupo.categorias.map((cat) => cat.id),
-        }));
+      // Sempre persiste no banco (organização é global)
+      console.log("[persistirOrganizacao] Vai persistir no banco");
+      setIsPending(true);
 
-        startTransition(async () => {
-          await salvarOrganizacaoCategorias(payload);
-        });
+      const payload = gruposAtualizados.map((grupo) => ({
+        groupId: grupo.id,
+        contaAzulCategoryIds: grupo.categorias.map((cat) => cat.id),
+      }));
+
+      console.log("[persistirOrganizacao] Payload a ser enviado:", JSON.stringify(payload));
+
+      try {
+        console.log("[persistirOrganizacao] Chamando salvarOrganizacaoCategorias...");
+        const result = await salvarOrganizacaoCategorias(payload);
+        console.log("[persistirOrganizacao] Resultado:", result);
+        if (result.success) {
+          toast.success("Organização salva!");
+        } else {
+          toast.error("Erro ao salvar organização");
+        }
+      } catch (error) {
+        console.error("[persistirOrganizacao] Erro:", error);
+        toast.error("Erro ao salvar organização");
+      } finally {
+        setIsPending(false);
       }
     },
-    [onGroupsChange, initialGroups]
+    [onGroupsChange]
   );
 
   const handleDragEnd = useCallback(
@@ -148,44 +179,55 @@ export function CategoryGroupManager({
       const { active, over } = event;
       setActiveCategoria(null);
 
-      if (!over) return;
+      console.log("[handleDragEnd] active:", active.id, "over:", over?.id);
+
+      if (!over || active.id === over.id) {
+        console.log("[handleDragEnd] Retornando sem ação - over:", over, "active.id === over.id:", active.id === over?.id);
+        return;
+      }
 
       const categoriaId = active.id as string;
       const grupoDestinoId = over.id as string;
 
-      // Encontrar a categoria arrastada
       const categoriaArrastada =
         categorias.find((c) => c.id === categoriaId) ||
         grupos.flatMap((g) => g.categorias).find((c) => c.id === categoriaId);
 
       if (!categoriaArrastada) return;
 
-      // Verificar se o destino é um grupo válido
-      const grupoDestino = grupos.find((g) => g.id === grupoDestinoId);
-      if (!grupoDestino) return;
+      const grupoOrigem = grupos.find((g) =>
+        g.categorias.some((c) => c.id === categoriaId)
+      );
 
-      // Verificar se a categoria já está nesse grupo
-      if (grupoDestino.categorias.some((c) => c.id === categoriaId)) return;
-
-      // Atualizar os grupos
-      const novosGrupos = grupos.map((grupo) => {
-        // Remover a categoria de qualquer grupo que ela esteja
-        const categoriasAtualizadas = grupo.categorias.filter(
-          (c) => c.id !== categoriaId
+      // Calcula o novo estado dos grupos
+      let novosGrupos = [...grupos];
+      // 1. Remove a categoria do grupo de origem (se houver)
+      if (grupoOrigem) {
+        novosGrupos = novosGrupos.map((g) =>
+          g.id === grupoOrigem.id
+            ? {
+                ...g,
+                categorias: g.categorias.filter((c) => c.id !== categoriaId),
+              }
+            : g
         );
+      }
+      // 2. Adiciona a categoria ao grupo de destino
+      novosGrupos = novosGrupos.map((g) =>
+        g.id === grupoDestinoId
+          ? {
+              ...g,
+              categorias: [...g.categorias, categoriaArrastada],
+            }
+          : g
+      );
 
-        // Adicionar ao grupo de destino
-        if (grupo.id === grupoDestinoId) {
-          return {
-            ...grupo,
-            categorias: [...categoriasAtualizadas, categoriaArrastada],
-          };
-        }
-
-        return { ...grupo, categorias: categoriasAtualizadas };
-      });
-
+      // Atualiza o estado
       setGrupos(novosGrupos);
+
+      console.log("[handleDragEnd] novosGrupos:", JSON.stringify(novosGrupos.map(g => ({ id: g.id, categorias: g.categorias.map(c => c.id) }))));
+
+      // Chama a persistência com o estado atualizado (side effect)
       persistirOrganizacao(novosGrupos);
     },
     [categorias, grupos, persistirOrganizacao]
@@ -203,33 +245,33 @@ export function CategoryGroupManager({
     [grupos, persistirOrganizacao]
   );
 
-  const handleReset = useCallback(() => {
+  const handleReset = useCallback(async () => {
     const gruposVazios = GRUPOS_DESPESAS_GRUPOPNG.map((g) => ({
       ...g,
       categorias: [] as Categoria[],
     }));
 
-    // Se está no modo dashboard, apenas atualiza estado local e callback
-    if (initialGroups) {
+    setIsPending(true);
+    try {
+      // Sempre persiste no banco (organização é global)
+      await resetarOrganizacaoCategorias();
       setGrupos(gruposVazios);
       onGroupsChange?.(gruposVazios);
       setIsResetDialogOpen(false);
-      return;
+      toast.success("Organização resetada!");
+    } catch (error) {
+      console.error("[handleReset] Erro:", error);
+      toast.error("Erro ao resetar organização");
+    } finally {
+      setIsPending(false);
     }
-
-    // Modo página de categorias: persiste no banco
-    startTransition(async () => {
-      await resetarOrganizacaoCategorias();
-      setGrupos(gruposVazios);
-      setIsResetDialogOpen(false);
-    });
-  }, [initialGroups, onGroupsChange]);
+  }, [onGroupsChange]);
 
   return (
     <>
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

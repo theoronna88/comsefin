@@ -10,15 +10,20 @@ interface GrupoComCategorias {
 export async function salvarOrganizacaoCategorias(
   grupos: GrupoComCategorias[]
 ) {
+  console.log("[SERVER] salvarOrganizacaoCategorias chamado");
+  console.log("[SERVER] Grupos recebidos:", JSON.stringify(grupos, null, 2));
+
   try {
-    const createOps: any[] = [];
+    const createOps: ReturnType<typeof prisma.categoriaAgrupada.create>[] = [];
 
     const deleteOp = prisma.categoriaAgrupada.deleteMany({});
 
     for (const grupo of grupos) {
       if (grupo.groupId) {
+        console.log(`[SERVER] Processando grupo: ${grupo.groupId} com ${grupo.contaAzulCategoryIds.length} categorias`);
         for (let i = 0; i < grupo.contaAzulCategoryIds.length; i++) {
           const catId = grupo.contaAzulCategoryIds[i];
+          console.log(`[SERVER] Adicionando categoria: ${catId} no grupo ${grupo.groupId} com ordem ${i}`);
 
           createOps.push(
             prisma.categoriaAgrupada.create({
@@ -33,11 +38,20 @@ export async function salvarOrganizacaoCategorias(
       }
     }
 
+    console.log(`[SERVER] Total de operações de criação: ${createOps.length}`);
+    console.log("[SERVER] Executando transação...");
+
     await prisma.$transaction([deleteOp, ...createOps]);
+
+    console.log("[SERVER] Transação concluída com sucesso!");
+
+    // Verificar o que foi salvo
+    const savedData = await prisma.categoriaAgrupada.findMany();
+    console.log("[SERVER] Dados salvos no banco:", JSON.stringify(savedData, null, 2));
 
     return { success: true };
   } catch (error) {
-    console.error("Erro ao salvar organização das categorias:", error);
+    console.error("[SERVER] Erro ao salvar organização das categorias:", error);
     return {
       success: false,
       message: "Não foi possível salvar a organização.",
