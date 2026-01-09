@@ -91,7 +91,7 @@ const FormBudget = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-col gap-4 m-4 w-3/4 mx-auto">
+        <div className="flex flex-col gap-4 m-4 w-3/4 mx-auto overflow-y-auto">
           <Label>Selecione o Ano</Label>
           <Select
             key={formData.ano || "empty"}
