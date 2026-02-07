@@ -35,7 +35,7 @@ export function CategoryDropZone({
         "flex flex-col p-4 rounded-xl border-2 border-dashed min-h-[120px] transition-all",
         isOver
           ? "border-primary bg-primary/10 scale-[1.02]"
-          : "border-gray-300 bg-gray-50"
+          : "border-gray-300 bg-gray-50",
       )}
       style={{
         borderColor: isOver ? undefined : cor,

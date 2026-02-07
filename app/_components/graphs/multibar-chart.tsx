@@ -52,7 +52,7 @@ const MultiBarChart = ({
         <div className="flex justify-center gap-8 text-sm text-muted-foreground">
           <p>
             Total {year}:{" "}
-            <span className="font-semibold text-primary">
+            <span className="font-semibold text-[#2f5597]">
               {totalAtual.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
@@ -61,7 +61,7 @@ const MultiBarChart = ({
           </p>
           <p>
             Total {prevYear}:{" "}
-            <span className="font-semibold text-blue-400">
+            <span className="font-semibold text-[#afabab]">
               {totalAnterior.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
@@ -187,11 +187,11 @@ const MultiBarChart = ({
         {year !== "" && (
           <div className="mt-4 flex justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <span className="block w-4 h-4 rounded-sm bg-[#2563eb]" />
+              <span className="block w-4 h-4 rounded-sm bg-[#2f5597]" />
               <span>{year}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="block w-4 h-4 rounded-sm bg-[#60a5fa]" />
+              <span className="block w-4 h-4 rounded-sm bg-[#afabab]" />
               <span>{prevYear}</span>
             </div>
           </div>

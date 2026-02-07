@@ -185,6 +185,17 @@ export interface CategoriaAgrupada extends Categoria {
   grupoId: string | null;
 }
 
+/*
+- Operacionais: 2f6bc8
+- Pessoal: 2f6bc8
+- PJ : 1b3c79
+- Presidencia: 8891a0
+- Plano de acoes: 1b3c79
+- Invés: c55a11
+- Trib: 4642e3
+
+*/
+
 // Grupos padrão de despesas baseados no PDF
 export const GRUPOS_DESPESAS_PADRAO: Omit<GrupoDespesa, "categorias">[] = [
   { id: "despesas-fixas", nome: "Despesas Fixas", cor: "#3b82f6" },
@@ -197,19 +208,19 @@ export const GRUPOS_DESPESAS_PADRAO: Omit<GrupoDespesa, "categorias">[] = [
 
 // Grupos baseados na imagem Grupo.png (exemplos capturados: Imóveis, Intangível, Hardware & Software)
 export const GRUPOS_DESPESAS_GRUPOPNG: Omit<GrupoDespesa, "categorias">[] = [
-  { id: "planos-acoes", nome: "Planos de Ações", cor: "#0ea5e9" },
+  { id: "planos-acoes", nome: "Planos de Ações", cor: "#11224d" },
   {
     id: "presidencia-diretoria",
     nome: "Presidência e Diretoria",
-    cor: "#1d4ed8",
+    cor: "#8891a0",
   },
   {
     id: "servicos-contratados-pj",
     nome: "Serviços Contratados - PJ",
-    cor: "#22c55e",
+    cor: "#1b3c79",
   },
-  { id: "pessoal", nome: "Pessoal", cor: "#f59e0b" },
-  { id: "operacionais", nome: "Operacionais", cor: "#a855f7" },
-  { id: "tributarias", nome: "Tributárias", cor: "#ef4444" },
-  { id: "investimentos", nome: "Investimentos", cor: "#6b7280" },
+  { id: "pessoal", nome: "Pessoal", cor: "#4c9ab3" },
+  { id: "operacionais", nome: "Operacionais", cor: "#2f6bc8" },
+  { id: "tributarias", nome: "Tributárias", cor: "#4642e3" },
+  { id: "investimentos", nome: "Investimentos", cor: "#c55a11" },
 ];
