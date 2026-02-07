@@ -6,11 +6,11 @@ import MultiBarChart from "./multibar-chart";
 const chartConfig = {
   atual: {
     label: "Atual",
-    color: "#2563eb",
+    color: "#2f5597",
   },
   anterior: {
     label: "Anterior",
-    color: "#60a5fa",
+    color: "#afabab",
   },
 } satisfies ChartConfig;
 

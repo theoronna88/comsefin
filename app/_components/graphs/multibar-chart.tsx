@@ -43,6 +43,8 @@ const MultiBarChart = ({
   const totalAtual = chartData.reduce((acc, item) => acc + item.atual, 0);
   const totalAnterior = chartData.reduce((acc, item) => acc + item.anterior, 0);
 
+  const chartHeight = Math.max(400, chartData.length * 65);
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -50,7 +52,7 @@ const MultiBarChart = ({
         <div className="flex justify-center gap-8 text-sm text-muted-foreground">
           <p>
             Total {year}:{" "}
-            <span className="font-semibold text-primary">
+            <span className="font-semibold text-[#2f5597]">
               {totalAtual.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
@@ -59,7 +61,7 @@ const MultiBarChart = ({
           </p>
           <p>
             Total {prevYear}:{" "}
-            <span className="font-semibold text-blue-400">
+            <span className="font-semibold text-[#afabab]">
               {totalAnterior.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
@@ -72,7 +74,11 @@ const MultiBarChart = ({
         {searching ? (
           <LoadingComsefaz width={150} height={150} />
         ) : (
-          <ChartContainer config={chartConfig} className="h-[400px] w-full">
+          <ChartContainer
+            config={chartConfig}
+            className=" w-full"
+            style={{ height: `${chartHeight}px` }}
+          >
             <ResponsiveContainer>
               <BarChart
                 data={chartData}
@@ -89,8 +95,65 @@ const MultiBarChart = ({
                 <YAxis
                   dataKey="categoria"
                   type="category"
-                  width={180}
-                  tick={{ fontSize: 11 }}
+                  width={170}
+                  tick={(props) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    const { x, y, payload } = props;
+                    const containerWidth = 100; // Largura total que o texto deve ocupar (um pouco menos que o width do axis)
+
+                    // Função para quebrar o texto (ex: 25 caracteres)
+                    const limit = 25;
+                    const words = payload.value.split(" ");
+                    const lines = [];
+                    let currentLine = "";
+
+                    words.forEach((word: string) => {
+                      if ((currentLine + word).length > limit) {
+                        lines.push(currentLine.trim());
+                        currentLine = word + " ";
+                      } else {
+                        currentLine += word + " ";
+                      }
+                    });
+                    lines.push(currentLine.trim());
+
+                    return (
+                      <g transform={`translate(10,${y})`}>
+                        <text
+                          x={0}
+                          y={0}
+                          fontSize={12}
+                          className="fill-muted-foreground"
+                          style={{ textRendering: "optimizeLegibility" }}
+                        >
+                          {lines.map((line, index) => {
+                            const isLastLine = index === lines.length - 1;
+                            const hasMultipleWords = line.split(" ").length > 1;
+
+                            return (
+                              <tspan
+                                x={0}
+                                dy={
+                                  index === 0 ? -((lines.length - 1) * 7) : 14
+                                }
+                                key={index}
+                                // Aplica o efeito de justificar:
+                                // Se não for a última linha e tiver mais de uma palavra, estica o texto.
+                                textLength={
+                                  !isLastLine && hasMultipleWords
+                                    ? containerWidth
+                                    : undefined
+                                }
+                                lengthAdjust="spacing"
+                              >
+                                {line}
+                              </tspan>
+                            );
+                          })}
+                        </text>
+                      </g>
+                    );
+                  }}
                 />
                 <ChartTooltip
                   content={
@@ -124,11 +187,11 @@ const MultiBarChart = ({
         {year !== "" && (
           <div className="mt-4 flex justify-center gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <span className="block w-4 h-4 rounded-sm bg-[#2563eb]" />
+              <span className="block w-4 h-4 rounded-sm bg-[#2f5597]" />
               <span>{year}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="block w-4 h-4 rounded-sm bg-[#60a5fa]" />
+              <span className="block w-4 h-4 rounded-sm bg-[#afabab]" />
               <span>{prevYear}</span>
             </div>
           </div>

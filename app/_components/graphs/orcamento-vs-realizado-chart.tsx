@@ -81,7 +81,7 @@ export function OrcamentoVsRealizadoChart({
       const categoriasData: CategoriaChartData[] = grupo.categorias
         .map((categoria) => {
           const categoriaComTotal = totaisDespesas.find(
-            (t) => t.categoriaId === categoria.id
+            (t) => t.categoriaId === categoria.id,
           );
           const realizado = categoriaComTotal?.totais?.pago?.valor || 0;
           const orcado = orcamentoMap.get(categoria.id) || 0;
@@ -115,11 +115,11 @@ export function OrcamentoVsRealizadoChart({
 
   const totalOrcadoGeral = gruposComDados.reduce(
     (acc, g) => acc + g.totalOrcado,
-    0
+    0,
   );
   const totalRealizadoGeral = gruposComDados.reduce(
     (acc, g) => acc + g.totalRealizado,
-    0
+    0,
   );
 
   if (grupos.every((g) => g.categorias.length === 0)) {
@@ -160,7 +160,7 @@ export function OrcamentoVsRealizadoChart({
           <div className="flex justify-center gap-8 text-sm text-muted-foreground">
             <p>
               Total Orçado:{" "}
-              <span className="font-semibold text-blue-600">
+              <span className="font-semibold text-[#2f5597]">
                 {totalOrcadoGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -169,7 +169,7 @@ export function OrcamentoVsRealizadoChart({
             </p>
             <p>
               Total Realizado:{" "}
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-[#afabab]">
                 {totalRealizadoGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -181,8 +181,8 @@ export function OrcamentoVsRealizadoChart({
               <span
                 className={
                   diferencaGeral >= 0
-                    ? "font-semibold text-green-600"
-                    : "font-semibold text-red-600"
+                    ? "font-semibold text-[#2f5597]"
+                    : "font-semibold text-[#afabab]"
                 }
               >
                 {diferencaGeral.toLocaleString("pt-BR", {
@@ -217,7 +217,7 @@ export function OrcamentoVsRealizadoChart({
                   <div className="flex gap-6 text-sm font-normal text-muted-foreground">
                     <span>
                       Orçado:{" "}
-                      <span className="font-semibold text-blue-600">
+                      <span className="font-semibold text-[#2f5597]">
                         {grupo.totalOrcado.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
@@ -226,7 +226,7 @@ export function OrcamentoVsRealizadoChart({
                     </span>
                     <span>
                       Realizado:{" "}
-                      <span className="font-semibold text-green-600">
+                      <span className="font-semibold text-[#afabab]">
                         {grupo.totalRealizado.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
@@ -238,8 +238,8 @@ export function OrcamentoVsRealizadoChart({
                       <span
                         className={
                           grupo.percentual <= 100
-                            ? "font-semibold text-green-600"
-                            : "font-semibold text-red-600"
+                            ? "font-semibold text-[#2f5597]"
+                            : "font-semibold text-[#afabab]"
                         }
                       >
                         {grupo.percentual.toFixed(1)}%
@@ -268,8 +268,68 @@ export function OrcamentoVsRealizadoChart({
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={180}
-                      tick={{ fontSize: 11 }}
+                      width={160}
+                      tick={(props) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { x, y, payload } = props;
+                        const containerWidth = 100; // Largura total que o texto deve ocupar (um pouco menos que o width do axis)
+
+                        // Função para quebrar o texto (ex: 25 caracteres)
+                        const limit = 25;
+                        const words = payload.value.split(" ");
+                        const lines = [];
+                        let currentLine = "";
+
+                        words.forEach((word: string) => {
+                          if ((currentLine + word).length > limit) {
+                            lines.push(currentLine.trim());
+                            currentLine = word + " ";
+                          } else {
+                            currentLine += word + " ";
+                          }
+                        });
+                        lines.push(currentLine.trim());
+
+                        return (
+                          <g transform={`translate(10,${y})`}>
+                            <text
+                              x={0}
+                              y={0}
+                              fontSize={12}
+                              className="fill-muted-foreground"
+                              style={{ textRendering: "optimizeLegibility" }}
+                            >
+                              {lines.map((line, index) => {
+                                const isLastLine = index === lines.length - 1;
+                                const hasMultipleWords =
+                                  line.split(" ").length > 1;
+
+                                return (
+                                  <tspan
+                                    x={0}
+                                    dy={
+                                      index === 0
+                                        ? -((lines.length - 1) * 7)
+                                        : 14
+                                    }
+                                    key={index}
+                                    // Aplica o efeito de justificar:
+                                    // Se não for a última linha e tiver mais de uma palavra, estica o texto.
+                                    textLength={
+                                      !isLastLine && hasMultipleWords
+                                        ? containerWidth
+                                        : undefined
+                                    }
+                                    lengthAdjust="spacing"
+                                  >
+                                    {line}
+                                  </tspan>
+                                );
+                              })}
+                            </text>
+                          </g>
+                        );
+                      }}
                     />
                     <Tooltip
                       formatter={(value: number) =>
@@ -282,13 +342,13 @@ export function OrcamentoVsRealizadoChart({
                     <Legend />
                     <Bar
                       dataKey="Orcado"
-                      fill="#3b82f6"
+                      fill="#2f5597"
                       name="Orçado"
                       barSize={16}
                     />
                     <Bar
                       dataKey="Realizado"
-                      fill="#22c55e"
+                      fill="#afabab"
                       name="Realizado"
                       barSize={16}
                     >
