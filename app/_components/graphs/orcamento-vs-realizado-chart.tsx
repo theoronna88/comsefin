@@ -160,7 +160,7 @@ export function OrcamentoVsRealizadoChart({
           <div className="flex justify-center gap-8 text-sm text-muted-foreground">
             <p>
               Total Orçado:{" "}
-              <span className="font-semibold text-blue-600">
+              <span className="font-semibold text-[#2f5597]">
                 {totalOrcadoGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -169,7 +169,7 @@ export function OrcamentoVsRealizadoChart({
             </p>
             <p>
               Total Realizado:{" "}
-              <span className="font-semibold text-green-600">
+              <span className="font-semibold text-[#afabab]">
                 {totalRealizadoGeral.toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",
@@ -181,8 +181,8 @@ export function OrcamentoVsRealizadoChart({
               <span
                 className={
                   diferencaGeral >= 0
-                    ? "font-semibold text-green-600"
-                    : "font-semibold text-red-600"
+                    ? "font-semibold text-[#2f5597]"
+                    : "font-semibold text-[#afabab]"
                 }
               >
                 {diferencaGeral.toLocaleString("pt-BR", {
@@ -217,7 +217,7 @@ export function OrcamentoVsRealizadoChart({
                   <div className="flex gap-6 text-sm font-normal text-muted-foreground">
                     <span>
                       Orçado:{" "}
-                      <span className="font-semibold text-blue-600">
+                      <span className="font-semibold text-[#2f5597]">
                         {grupo.totalOrcado.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
@@ -226,7 +226,7 @@ export function OrcamentoVsRealizadoChart({
                     </span>
                     <span>
                       Realizado:{" "}
-                      <span className="font-semibold text-green-600">
+                      <span className="font-semibold text-[#afabab]">
                         {grupo.totalRealizado.toLocaleString("pt-BR", {
                           style: "currency",
                           currency: "BRL",
@@ -238,8 +238,8 @@ export function OrcamentoVsRealizadoChart({
                       <span
                         className={
                           grupo.percentual <= 100
-                            ? "font-semibold text-green-600"
-                            : "font-semibold text-red-600"
+                            ? "font-semibold text-[#2f5597]"
+                            : "font-semibold text-[#afabab]"
                         }
                       >
                         {grupo.percentual.toFixed(1)}%
@@ -342,13 +342,13 @@ export function OrcamentoVsRealizadoChart({
                     <Legend />
                     <Bar
                       dataKey="Orcado"
-                      fill="#3b82f6"
+                      fill="#2f5597"
                       name="Orçado"
                       barSize={16}
                     />
                     <Bar
                       dataKey="Realizado"
-                      fill="#22c55e"
+                      fill="#afabab"
                       name="Realizado"
                       barSize={16}
                     >
