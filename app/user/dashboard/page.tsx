@@ -80,7 +80,7 @@ export default function Page() {
 
   // Estado para os grupos de despesas (drag and drop)
   const [gruposDespesas, setGruposDespesas] = useState<GrupoDespesa[]>(() =>
-    GRUPOS_DESPESAS_GRUPOPNG.map((g) => ({ ...g, categorias: [] }))
+    GRUPOS_DESPESAS_GRUPOPNG.map((g) => ({ ...g, categorias: [] })),
   );
 
   const [budget, setBudget] = useState<Orcamento | null>(null);
@@ -96,7 +96,7 @@ export default function Page() {
     setGruposDespesas(grupos);
     // Atualizar as categorias selecionadas baseado nos grupos
     const categoriasAgrupadas = grupos.flatMap((g) =>
-      g.categorias.map((c) => ({ id: c.id, nome: c.nome }))
+      g.categorias.map((c) => ({ id: c.id, nome: c.nome })),
     );
     setSelectedDespesasCategories(categoriasAgrupadas);
   }, []);
@@ -130,7 +130,7 @@ export default function Page() {
               .sort((a, b) => a.ordem - b.ordem)
               .map((org) => {
                 const categoria = resDespesas.itens.find(
-                  (cat: Categoria) => cat.id === org.contaAzulCategoryId
+                  (cat: Categoria) => cat.id === org.contaAzulCategoryId,
                 );
                 return categoria;
               })
@@ -146,11 +146,14 @@ export default function Page() {
 
           // Atualiza as categorias selecionadas
           const categoriasAgrupadas = gruposComCategorias.flatMap((g) =>
-            g.categorias.map((c) => ({ id: c.id, nome: c.nome }))
+            g.categorias.map((c) => ({ id: c.id, nome: c.nome })),
           );
           setSelectedDespesasCategories(categoriasAgrupadas);
 
-          console.log("[Dashboard] Organização carregada do banco:", gruposComCategorias);
+          console.log(
+            "[Dashboard] Organização carregada do banco:",
+            gruposComCategorias,
+          );
         }
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
@@ -294,7 +297,7 @@ export default function Page() {
                             <Checkbox
                               id={`receita-${categoria.id}`}
                               checked={selectedReceitasCategories.some(
-                                (cat) => cat.id === categoria.id
+                                (cat) => cat.id === categoria.id,
                               )}
                               onCheckedChange={(checked) => {
                                 if (checked) {
@@ -308,8 +311,8 @@ export default function Page() {
                                 } else {
                                   setSelectedReceitasCategories((prev) =>
                                     prev.filter(
-                                      (cat) => cat.id !== categoria.id
-                                    )
+                                      (cat) => cat.id !== categoria.id,
+                                    ),
                                   );
                                 }
                               }}

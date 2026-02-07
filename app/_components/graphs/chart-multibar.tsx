@@ -46,14 +46,14 @@ const ChartMultibar = ({ title, chartConfig, data }: ChartMultibarProps) => {
 
                 <XAxis
                   dataKey={data[0]?.centro ? "centro" : "categoria"}
-                  tick={{ fontSize: 14 }}
+                  tick={{ fontSize: 12 }}
                   interval={0}
                   angle={-45}
                   textAnchor="end"
                   height={200}
                 />
                 <YAxis
-                  tick={{ fontSize: 14, fontWeight: "bold" }}
+                  tick={{ fontSize: 12, fontWeight: "bold" }}
                   tickFormatter={(value) =>
                     new Intl.NumberFormat("pt-BR", {
                       style: "currency",

@@ -63,7 +63,7 @@ export function GruposDespesasChart({
       grupo.categorias.forEach((categoria) => {
         // Encontrar a categoria nos totaisDespesas
         const categoriaComTotal = totaisDespesas.find(
-          (t) => t.categoriaId === categoria.id
+          (t) => t.categoriaId === categoria.id,
         );
         if (categoriaComTotal?.totais?.pago?.valor) {
           totalGrupo += categoriaComTotal.totais.pago.valor;
@@ -83,13 +83,16 @@ export function GruposDespesasChart({
   const totalGeral = dadosGrupos.reduce((acc, g) => acc + g.total, 0);
 
   // Configuração para o gráfico
-  const chartConfig = dadosGrupos.reduce((acc, grupo) => {
-    acc[grupo.nome] = {
-      label: grupo.nome,
-      color: grupo.cor,
-    };
-    return acc;
-  }, {} as Record<string, { label: string; color: string }>);
+  const chartConfig = dadosGrupos.reduce(
+    (acc, grupo) => {
+      acc[grupo.nome] = {
+        label: grupo.nome,
+        color: grupo.cor,
+      };
+      return acc;
+    },
+    {} as Record<string, { label: string; color: string }>,
+  );
 
   const pieData = dadosGrupos.map((g) => ({
     name: g.nome,
@@ -196,6 +199,7 @@ export function GruposDespesasChart({
                     </Pie>
                     <ChartLegend
                       content={<ChartLegendContent nameKey="name" />}
+                      className="-translate-y-2 flex-wrap items-start gap-y-2"
                     />
                   </PieChart>
                 </ResponsiveContainer>
