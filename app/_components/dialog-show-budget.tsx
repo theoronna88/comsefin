@@ -29,7 +29,7 @@ const DialogBudget = ({ ano, budgets }: DialogBudgetProps) => {
             </Button>
           </DropdownMenuItem>
         </DialogTrigger>
-        <DialogContent className="w-screen max-w-4xl overflow-auto">
+        <DialogContent className="w-full max-w-4xl h-screen max-h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-primary">
               Orçamento {ano}
@@ -44,7 +44,9 @@ const DialogBudget = ({ ano, budgets }: DialogBudgetProps) => {
                     className="flex justify-between m-2 border-b border-gray-300"
                     key={valor.item?.id || valor.id}
                   >
-                    <span key={valor.item?.id || valor.id}>{valor.item?.descricao}:</span>
+                    <span key={valor.item?.id || valor.id}>
+                      {valor.item?.descricao}:
+                    </span>
                     <span>
                       {Number(valor.valor).toLocaleString("pt-BR", {
                         style: "currency",
