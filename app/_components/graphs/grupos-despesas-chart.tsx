@@ -171,7 +171,11 @@ export function GruposDespesasChart({
                 className="mx-auto aspect-square max-h-[400px]"
               >
                 <ResponsiveContainer>
-                  <PieChart>
+                  <PieChart
+                    className="[&_.recharts-sector]:stroke-white 
+                  [&_.recharts-pie-label-text]:font-bold
+                  [&_.recharts-sector]:stroke-2"
+                  >
                     <ChartTooltip
                       content={
                         <ChartTooltipContent
@@ -191,10 +195,16 @@ export function GruposDespesasChart({
                       cx="50%"
                       cy="50%"
                       outerRadius="80%"
+                      labelLine={{ stroke: "#888", strokeWidth: 1 }}
                       label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
                     >
                       {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.fill}
+                          // Pode remover o stroke daqui, já que o CSS vai assumir o comando
+                          stroke="none"
+                        />
                       ))}
                     </Pie>
                     <ChartLegend
