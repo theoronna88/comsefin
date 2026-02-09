@@ -59,7 +59,12 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
             className="mx-auto aspect-square max-h-[400px]"
           >
             <ResponsiveContainer>
-              <PieChart>
+              <PieChart
+                className="[&_.recharts-pie-label-text]:font-bold 
+              [&_.recharts-sector]:stroke-white 
+              [&_.recharts-sector]:stroke-2
+              "
+              >
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
@@ -82,7 +87,11 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
                   label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.fill}
+                      stroke="none"
+                    />
                   ))}
                 </Pie>
                 <ChartLegend content={<ChartLegendContent nameKey="label" />} />
