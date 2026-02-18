@@ -16,6 +16,12 @@ import { toast } from "sonner";
 import { Card, CardContent } from "./ui/card";
 import type { Categoria, Orcamento } from "@/app/_lib/types";
 import { useAsyncAction } from "../_hooks/use-async-action";
+import {
+  extractDigits,
+  formatBRLFromCents,
+  centsToNumber,
+  numberToCents,
+} from "@/app/_lib/utils";
 
 const FormBudget = ({
   categorias,
@@ -32,7 +38,14 @@ const FormBudget = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (name === "ano") {
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: extractDigits(value),
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,7 +63,7 @@ const FormBudget = ({
           .map(([categoriaId, valor]) => ({
             categoriaId,
             nome: categoriaMap.get(categoriaId) || categoriaId,
-            valor: Number(valor.replace(",", ".")),
+            valor: centsToNumber(valor),
           })),
       };
 
@@ -80,7 +93,7 @@ const FormBudget = ({
         // O codigo do item contém o categoriaId (UUID da categoria do Conta Azul)
         const categoriaId = valor.item?.codigo;
         if (categoriaId) {
-          existingData[categoriaId] = String(valor.valor);
+          existingData[categoriaId] = numberToCents(Number(valor.valor));
         }
       });
       setFormData(existingData);
@@ -127,10 +140,11 @@ const FormBudget = ({
                     <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
                     <Input
                       type="text"
+                      inputMode="numeric"
                       name={categoria.id}
                       placeholder={categoria.nome}
                       onChange={handleChange}
-                      value={formData[categoria.id] || ""}
+                      value={formData[categoria.id] ? formatBRLFromCents(formData[categoria.id]) : ""}
                     />
                   </div>
                 ))}
@@ -146,10 +160,11 @@ const FormBudget = ({
                     <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
                     <Input
                       type="text"
+                      inputMode="numeric"
                       name={categoria.id}
                       placeholder={categoria.nome}
                       onChange={handleChange}
-                      value={formData[categoria.id] || ""}
+                      value={formData[categoria.id] ? formatBRLFromCents(formData[categoria.id]) : ""}
                     />
                   </div>
                 ))}
