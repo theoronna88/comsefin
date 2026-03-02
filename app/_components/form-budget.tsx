@@ -14,8 +14,16 @@ import {
 import { saveBudget } from "@/app/api/orcamento";
 import { toast } from "sonner";
 import { Card, CardContent } from "./ui/card";
-import type { Categoria, Orcamento } from "@/app/_lib/types";
+import type { Categoria, Orcamento, GrupoDespesa } from "@/app/_lib/types";
+import { GRUPOS_DESPESAS_GRUPOPNG } from "@/app/_lib/types";
 import { useAsyncAction } from "../_hooks/use-async-action";
+import {
+  extractDigits,
+  formatBRLFromCents,
+  centsToNumber,
+  numberToCents,
+} from "@/app/_lib/utils";
+import { getOrganizacaoCategorias } from "@/app/_actions/categoria-actions";
 
 const FormBudget = ({
   categorias,
@@ -29,10 +37,21 @@ const FormBudget = ({
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
   const [firstPass, setFirstPass] = useState(true);
   const { execute, isLoading } = useAsyncAction();
+  const [gruposDespesas, setGruposDespesas] = useState<GrupoDespesa[]>([]);
+  const [despesasNaoAgrupadas, setDespesasNaoAgrupadas] = useState<Categoria[]>(
+    [],
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    if (name === "ano") {
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: extractDigits(value),
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,7 +69,7 @@ const FormBudget = ({
           .map(([categoriaId, valor]) => ({
             categoriaId,
             nome: categoriaMap.get(categoriaId) || categoriaId,
-            valor: Number(valor.replace(",", ".")),
+            valor: centsToNumber(valor),
           })),
       };
 
@@ -80,13 +99,46 @@ const FormBudget = ({
         // O codigo do item contém o categoriaId (UUID da categoria do Conta Azul)
         const categoriaId = valor.item?.codigo;
         if (categoriaId) {
-          existingData[categoriaId] = String(valor.valor);
+          existingData[categoriaId] = numberToCents(Number(valor.valor));
         }
       });
       setFormData(existingData);
       setFirstPass(false);
     }
   }, [budget, firstPass]);
+
+  useEffect(() => {
+    const fetchOrganizacao = async () => {
+      const organizacaoSalva = await getOrganizacaoCategorias();
+      if (organizacaoSalva.length === 0) return;
+
+      const despesas = categorias.filter((cat) => cat.tipo === "DESPESA");
+
+      const gruposComCategorias = GRUPOS_DESPESAS_GRUPOPNG.map((grupo) => {
+        const categoriasDoGrupo = organizacaoSalva
+          .filter((org) => org.grupoId === grupo.id)
+          .sort((a, b) => a.ordem - b.ordem)
+          .map((org) =>
+            despesas.find((cat) => cat.id === org.contaAzulCategoryId),
+          )
+          .filter(Boolean) as Categoria[];
+        return { ...grupo, categorias: categoriasDoGrupo };
+      });
+
+      setGruposDespesas(gruposComCategorias);
+
+      const idsAgrupados = new Set(
+        organizacaoSalva.map((o) => o.contaAzulCategoryId),
+      );
+      setDespesasNaoAgrupadas(
+        despesas.filter((cat) => !idsAgrupados.has(cat.id)),
+      );
+    };
+
+    if (categorias.length > 0) {
+      fetchOrganizacao();
+    }
+  }, [categorias]);
 
   return (
     <>
@@ -127,34 +179,116 @@ const FormBudget = ({
                     <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
                     <Input
                       type="text"
+                      inputMode="numeric"
                       name={categoria.id}
                       placeholder={categoria.nome}
                       onChange={handleChange}
-                      value={formData[categoria.id] || ""}
+                      value={
+                        formData[categoria.id]
+                          ? formatBRLFromCents(formData[categoria.id])
+                          : ""
+                      }
                     />
                   </div>
                 ))}
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="bg-red-50">
-              {/* Despesas */}
-              {categorias
-                .filter((cat) => cat.tipo === "DESPESA")
-                .map((categoria) => (
-                  <div key={categoria.id}>
-                    <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
-                    <Input
-                      type="text"
-                      name={categoria.id}
-                      placeholder={categoria.nome}
-                      onChange={handleChange}
-                      value={formData[categoria.id] || ""}
-                    />
-                  </div>
+          {/* Despesas */}
+          {gruposDespesas.some((g) => g.categorias.length > 0) ? (
+            <>
+              {gruposDespesas
+                .filter((grupo) => grupo.categorias.length > 0)
+                .map((grupo) => (
+                  <Card key={grupo.id}>
+                    <CardContent className="p-0 flex">
+                      <div className="flex items-stretch gap-4">
+                        {/* Faixa com a cor do grupo */}
+                        <div
+                          className="w-2 rounded-full h-full"
+                          style={{ backgroundColor: grupo.cor }}
+                        ></div>
+                      </div>
+
+                      <div className="py-2 px-4">
+                        {/* Conteúdo */}
+                        <Label className="text-base font-semibold mb-2 block">
+                          {grupo.nome} - {grupo.cor}
+                        </Label>
+                        {grupo.categorias.map((categoria) => (
+                          <div key={categoria.id}>
+                            <Label htmlFor={categoria.nome}>
+                              {categoria.nome}
+                            </Label>
+                            <Input
+                              type="text"
+                              inputMode="numeric"
+                              name={categoria.id}
+                              placeholder={categoria.nome}
+                              onChange={handleChange}
+                              value={
+                                formData[categoria.id]
+                                  ? formatBRLFromCents(formData[categoria.id])
+                                  : ""
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
-            </CardContent>
-          </Card>
+              {despesasNaoAgrupadas.length > 0 && (
+                <Card>
+                  <CardContent className="bg-red-50">
+                    <Label className="text-base font-semibold mb-2 block">
+                      Outras Despesas
+                    </Label>
+                    {despesasNaoAgrupadas.map((categoria) => (
+                      <div key={categoria.id}>
+                        <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          name={categoria.id}
+                          placeholder={categoria.nome}
+                          onChange={handleChange}
+                          value={
+                            formData[categoria.id]
+                              ? formatBRLFromCents(formData[categoria.id])
+                              : ""
+                          }
+                        />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          ) : (
+            <Card>
+              <CardContent className="bg-red-50">
+                {categorias
+                  .filter((cat) => cat.tipo === "DESPESA")
+                  .map((categoria) => (
+                    <div key={categoria.id}>
+                      <Label htmlFor={categoria.nome}>{categoria.nome}</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        name={categoria.id}
+                        placeholder={categoria.nome}
+                        onChange={handleChange}
+                        value={
+                          formData[categoria.id]
+                            ? formatBRLFromCents(formData[categoria.id])
+                            : ""
+                        }
+                      />
+                    </div>
+                  ))}
+              </CardContent>
+            </Card>
+          )}
         </div>
         <div className="flex justify-end w-3/4 mx-auto">
           <Button type="submit" className="justify-end" disabled={isLoading}>
