@@ -45,6 +45,42 @@ export function PercentualCategoriasPie({
     ) {
       return "#256a67";
     }
+
+    if (
+      categoriaNome.includes("Ressarcimentos") ||
+      categoriaNome.includes("Ressarcimento") ||
+      categoriaNome.includes("Devolução") ||
+      categoriaNome.includes("Devoluções")
+    ) {
+      return "#e67e22"; // laranja para ressarcimentos
+    }
+
+    if (categoriaNome.includes("Máster")) {
+      return "#7b2d8e"; // roxo para máster
+    }
+
+    if (
+      categoriaNome.includes("Descontos") ||
+      categoriaNome.includes("Desconto")
+    ) {
+      return "#1abc9c"; // turquesa para descontos
+    }
+
+    if (categoriaNome.includes("Juros") || categoriaNome.includes("Juro")) {
+      return "#e74c3c"; // vermelho para juros
+    }
+
+    if (categoriaNome.includes("Fretes") || categoriaNome.includes("Frete")) {
+      return "#d4a017"; // cinza para fretes
+    }
+
+    if (
+      categoriaNome.includes("Integralização") ||
+      categoriaNome.includes("Integralizações")
+    ) {
+      return "#1a1a1a"; // preto para integralizações
+    }
+
     return "#c8ccb4"; // cinza para "Outros"
   }
 
