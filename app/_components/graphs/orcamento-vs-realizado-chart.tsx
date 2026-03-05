@@ -42,7 +42,7 @@ interface CategoriaChartData {
   name: string;
   Orcado: number;
   Realizado: number;
-  percentual: number;
+  percentual: number | string;
 }
 
 interface GrupoComDados {
@@ -53,7 +53,7 @@ interface GrupoComDados {
   totalOrcado: number;
   totalRealizado: number;
   diferenca: number;
-  percentual: number;
+  percentual: number | string;
 }
 
 export function OrcamentoVsRealizadoChart({
@@ -89,7 +89,8 @@ export function OrcamentoVsRealizadoChart({
           totalOrcado += orcado;
           totalRealizado += realizado;
 
-          const percentual = orcado > 0 ? (realizado / orcado) * 100 : 0;
+          const percentual =
+            orcado > 0 ? (realizado / orcado) * 100 : "Não Orçado";
 
           return {
             name: categoria.nome,
@@ -108,7 +109,8 @@ export function OrcamentoVsRealizadoChart({
         totalOrcado,
         totalRealizado,
         diferenca: totalOrcado - totalRealizado,
-        percentual: totalOrcado > 0 ? (totalRealizado / totalOrcado) * 100 : 0,
+        percentual:
+          totalOrcado > 0 ? (totalRealizado / totalOrcado) * 100 : "Não Orçado",
       };
     })
     .filter((g) => g.categorias.length > 0);
@@ -237,12 +239,16 @@ export function OrcamentoVsRealizadoChart({
                       Utilizado:{" "}
                       <span
                         className={
+                          typeof grupo.percentual === "number" &&
                           grupo.percentual <= 100
                             ? "font-semibold text-[#2f5597]"
                             : "font-semibold text-[#afabab]"
                         }
                       >
-                        {grupo.percentual.toFixed(1)}%
+                        {typeof grupo.percentual === "number"
+                          ? grupo.percentual.toFixed(1)
+                          : grupo.percentual}
+                        %
                       </span>
                     </span>
                   </div>
@@ -262,18 +268,16 @@ export function OrcamentoVsRealizadoChart({
                     <XAxis
                       type="number"
                       tickFormatter={(value) =>
-                        "R$ " + (value / 1000).toFixed(0) + "k"
+                        "R$ " + value.toLocaleString("pt-BR")
                       }
                     />
                     <YAxis
                       type="category"
                       dataKey="name"
-                      width={160}
+                      width={170}
                       tick={(props) => {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { x, y, payload } = props;
-                        const containerWidth = 100; // Largura total que o texto deve ocupar (um pouco menos que o width do axis)
-
                         // Função para quebrar o texto (ex: 25 caracteres)
                         const limit = 25;
                         const words = payload.value.split(" ");
@@ -299,33 +303,19 @@ export function OrcamentoVsRealizadoChart({
                               className="fill-muted-foreground"
                               style={{ textRendering: "optimizeLegibility" }}
                             >
-                              {lines.map((line, index) => {
-                                const isLastLine = index === lines.length - 1;
-                                const hasMultipleWords =
-                                  line.split(" ").length > 1;
-
-                                return (
-                                  <tspan
-                                    x={0}
-                                    dy={
-                                      index === 0
-                                        ? -((lines.length - 1) * 7)
-                                        : 14
-                                    }
-                                    key={index}
-                                    // Aplica o efeito de justificar:
-                                    // Se não for a última linha e tiver mais de uma palavra, estica o texto.
-                                    textLength={
-                                      !isLastLine && hasMultipleWords
-                                        ? containerWidth
-                                        : undefined
-                                    }
-                                    lengthAdjust="spacing"
-                                  >
-                                    {line}
-                                  </tspan>
-                                );
-                              })}
+                              {lines.map((line, index) => (
+                                <tspan
+                                  key={index}
+                                  x={0}
+                                  dy={index === 0 ? "0em" : "1.2em"}
+                                  textAnchor="start"
+                                  style={{
+                                    textRendering: "optimizeLegibility",
+                                  }}
+                                >
+                                  {line}
+                                </tspan>
+                              ))}
                             </text>
                           </g>
                         );
@@ -355,9 +345,13 @@ export function OrcamentoVsRealizadoChart({
                       <LabelList
                         dataKey="percentual"
                         position="right"
-                        formatter={(value: number) => value.toFixed(1) + "%"}
+                        formatter={(value: number | string) =>
+                          typeof value === "number"
+                            ? value.toFixed(1) + "%"
+                            : value + ""
+                        }
                         style={{
-                          fontSize: 10,
+                          fontSize: 14,
                           fontWeight: "bold",
                           fill: "#374151",
                         }}
@@ -385,6 +379,7 @@ export function OrcamentoVsRealizadoChart({
                             ? "text-right py-2 px-3 text-green-600"
                             : "text-right py-2 px-3 text-red-600";
                         const percClass =
+                          typeof cat.percentual === "number" &&
                           cat.percentual <= 100
                             ? "text-right py-2 px-3 text-green-600"
                             : "text-right py-2 px-3 text-red-600";
@@ -411,7 +406,10 @@ export function OrcamentoVsRealizadoChart({
                               })}
                             </td>
                             <td className={percClass}>
-                              {cat.percentual.toFixed(1)}%
+                              {typeof cat.percentual === "number"
+                                ? cat.percentual.toFixed(1)
+                                : cat.percentual}
+                              %
                             </td>
                           </tr>
                         );
@@ -446,12 +444,15 @@ export function OrcamentoVsRealizadoChart({
                         </td>
                         <td
                           className={
+                            typeof grupo.percentual === "number" &&
                             grupo.percentual <= 100
                               ? "text-right py-2 px-3 text-green-600"
                               : "text-right py-2 px-3 text-red-600"
                           }
                         >
-                          {grupo.percentual.toFixed(1)}%
+                          {typeof grupo.percentual === "number"
+                            ? grupo.percentual.toFixed(1) + "%"
+                            : grupo.percentual}
                         </td>
                       </tr>
                     </tfoot>
