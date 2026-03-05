@@ -89,7 +89,7 @@ const MultiBarChart = ({
                 <XAxis
                   type="number"
                   tickFormatter={(value) =>
-                    (value / 1000).toLocaleString("pt-BR") + "k"
+                    "R$ " + value.toLocaleString("pt-BR")
                   }
                 />
                 <YAxis
@@ -99,9 +99,6 @@ const MultiBarChart = ({
                   tick={(props) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { x, y, payload } = props;
-                    const containerWidth = 100; // Largura total que o texto deve ocupar (um pouco menos que o width do axis)
-
-                    // Função para quebrar o texto (ex: 25 caracteres)
                     const limit = 25;
                     const words = payload.value.split(" ");
                     const lines = [];
@@ -127,9 +124,6 @@ const MultiBarChart = ({
                           style={{ textRendering: "optimizeLegibility" }}
                         >
                           {lines.map((line, index) => {
-                            const isLastLine = index === lines.length - 1;
-                            const hasMultipleWords = line.split(" ").length > 1;
-
                             return (
                               <tspan
                                 x={0}
@@ -137,14 +131,7 @@ const MultiBarChart = ({
                                   index === 0 ? -((lines.length - 1) * 7) : 14
                                 }
                                 key={index}
-                                // Aplica o efeito de justificar:
-                                // Se não for a última linha e tiver mais de uma palavra, estica o texto.
-                                textLength={
-                                  !isLastLine && hasMultipleWords
-                                    ? containerWidth
-                                    : undefined
-                                }
-                                lengthAdjust="spacing"
+                                textAnchor="start"
                               >
                                 {line}
                               </tspan>
@@ -172,12 +159,14 @@ const MultiBarChart = ({
                   fill="var(--color-atual)"
                   radius={[0, 4, 4, 0]}
                   name={year}
+                  minPointSize={(value) => (value && value > 0 ? 5 : 0)}
                 />
                 <Bar
                   dataKey="anterior"
                   fill="var(--color-anterior)"
                   radius={[0, 4, 4, 0]}
                   name={String(prevYear)}
+                  minPointSize={(value) => (value && value > 0 ? 5 : 0)}
                 />
               </BarChart>
             </ResponsiveContainer>
