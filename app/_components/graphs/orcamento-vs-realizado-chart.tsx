@@ -89,8 +89,7 @@ export function OrcamentoVsRealizadoChart({
           totalOrcado += orcado;
           totalRealizado += realizado;
 
-          const percentual =
-            orcado > 0 ? (realizado / orcado) * 100 : "Não Orçado";
+          const percentual = orcado > 0 ? (realizado / orcado) * 100 : "-";
 
           return {
             name: categoria.nome,
@@ -110,7 +109,7 @@ export function OrcamentoVsRealizadoChart({
         totalRealizado,
         diferenca: totalOrcado - totalRealizado,
         percentual:
-          totalOrcado > 0 ? (totalRealizado / totalOrcado) * 100 : "Não Orçado",
+          totalOrcado > 0 ? (totalRealizado / totalOrcado) * 100 : "-",
       };
     })
     .filter((g) => g.categorias.length > 0);
@@ -246,9 +245,8 @@ export function OrcamentoVsRealizadoChart({
                         }
                       >
                         {typeof grupo.percentual === "number"
-                          ? grupo.percentual.toFixed(1)
+                          ? grupo.percentual.toFixed(1) + "%"
                           : grupo.percentual}
-                        %
                       </span>
                     </span>
                   </div>
@@ -329,18 +327,24 @@ export function OrcamentoVsRealizadoChart({
                         })
                       }
                     />
-                    <Legend />
+                    <Legend
+                      formatter={(value) => (
+                        <span style={{ marginRight: 50 }}>{value}</span>
+                      )}
+                    />
                     <Bar
                       dataKey="Orcado"
                       fill="#2f5597"
                       name="Orçado"
                       barSize={16}
+                      radius={[0, 4, 4, 0]}
                     />
                     <Bar
                       dataKey="Realizado"
                       fill="#afabab"
                       name="Realizado"
                       barSize={16}
+                      radius={[0, 4, 4, 0]}
                     >
                       <LabelList
                         dataKey="percentual"
@@ -407,9 +411,8 @@ export function OrcamentoVsRealizadoChart({
                             </td>
                             <td className={percClass}>
                               {typeof cat.percentual === "number"
-                                ? cat.percentual.toFixed(1)
+                                ? cat.percentual.toFixed(1) + "%"
                                 : cat.percentual}
-                              %
                             </td>
                           </tr>
                         );
