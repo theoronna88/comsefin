@@ -168,7 +168,7 @@ export function GruposDespesasChart({
             <TabsContent value="pie">
               <ChartContainer
                 config={chartConfig}
-                className="mx-auto aspect-square max-h-[400px]"
+                className="mx-auto aspect-square max-h-[400px] w-3/4"
               >
                 <ResponsiveContainer>
                   <PieChart
@@ -209,7 +209,10 @@ export function GruposDespesasChart({
                     </Pie>
                     <ChartLegend
                       content={<ChartLegendContent nameKey="name" />}
-                      className="-translate-y-2 flex-wrap items-start gap-y-2"
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
+                      className="flex-col items-start gap-2"
                     />
                   </PieChart>
                 </ResponsiveContainer>
