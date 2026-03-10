@@ -22,7 +22,7 @@ import type {
   TokenResponse,
 } from "../_lib/types";
 
-const IDS_CONTAS_FINANCEIRAS = process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS
+const ids_contas_financeiras = process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS
   ? process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS
   : "";
 
@@ -259,7 +259,7 @@ export async function getDespesas(
       tamanho_pagina: "1000",
       data_vencimento_de: dataVencimentoDe,
       data_vencimento_ate: dataVencimentoAte,
-      ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
+      ids_contas_financeiras: ids_contas_financeiras,
     };
 
     if (
@@ -335,7 +335,7 @@ export async function getReceitas(
       tamanho_pagina: "1000",
       data_vencimento_de: dataVencimentoDe,
       data_vencimento_ate: dataVencimentoAte,
-      ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
+      ids_contas_financeiras: ids_contas_financeiras,
     };
 
     if (
