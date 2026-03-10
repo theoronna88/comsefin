@@ -6,13 +6,14 @@ export async function getDespesas(
   dataVencimentoDe,
   dataVencimentoAte,
   categorias,
-  centrosDeCusto
+  centrosDeCusto,
 ) {
   const queryParams = {
     pagina: "1",
     tamanho_pagina: "5000",
     data_vencimento_de: dataVencimentoDe,
     data_vencimento_ate: dataVencimentoAte,
+    ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
     status: "ACQUITTED",
   };
 
@@ -42,7 +43,7 @@ export async function getDespesas(
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
 
   const data = await response.json();

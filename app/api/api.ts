@@ -22,6 +22,10 @@ import type {
   TokenResponse,
 } from "../_lib/types";
 
+const IDS_CONTAS_FINANCEIRAS = process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS
+  ? process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS
+  : "";
+
 // ==========================================
 // FUNÇÕES DE AUTENTICAÇÃO
 // ==========================================
@@ -48,10 +52,10 @@ export async function getApiUrl(): Promise<never> {
  * @returns Token de acesso e refresh token
  */
 export async function getToken(
-  authorizationCode: string
+  authorizationCode: string,
 ): Promise<TokenResponse> {
   const basicAuth = Buffer.from(
-    `${process.env.NEXT_CLIENT_ID}:${process.env.NEXT_CLIENT_SECRET}`
+    `${process.env.NEXT_CLIENT_ID}:${process.env.NEXT_CLIENT_SECRET}`,
   ).toString("base64");
 
   const params = new URLSearchParams({
@@ -76,7 +80,7 @@ export async function getToken(
 
     if (!response.ok) {
       throw new ExternalAPIError(
-        `Falha ao obter token: ${response.status} - ${response.statusText}`
+        `Falha ao obter token: ${response.status} - ${response.statusText}`,
       );
     }
     console.log("[getToken] Resposta do token:", resultText);
@@ -104,7 +108,7 @@ export async function getCentroCusto(): Promise<
 
     if (!accessToken) {
       throw new AuthenticationError(
-        "Token da Conta Azul não encontrado. Faça login novamente."
+        "Token da Conta Azul não encontrado. Faça login novamente.",
       );
     }
 
@@ -120,7 +124,7 @@ export async function getCentroCusto(): Promise<
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -145,7 +149,7 @@ export async function getPessoa(): Promise<ContaAzulPaginatedResponse<Pessoa>> {
 
     if (!accessToken) {
       throw new AuthenticationError(
-        "Token da Conta Azul não encontrado. Faça login novamente."
+        "Token da Conta Azul não encontrado. Faça login novamente.",
       );
     }
 
@@ -161,7 +165,7 @@ export async function getPessoa(): Promise<ContaAzulPaginatedResponse<Pessoa>> {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -182,14 +186,14 @@ export async function getPessoa(): Promise<ContaAzulPaginatedResponse<Pessoa>> {
  * @returns Lista paginada de categorias
  */
 export async function getCategorias(
-  tipo?: string
+  tipo?: string,
 ): Promise<ContaAzulPaginatedResponse<Categoria>> {
   try {
     const accessToken = await getContaAzulToken();
 
     if (!accessToken) {
       throw new AuthenticationError(
-        "Token da Conta Azul não encontrado. Faça login novamente."
+        "Token da Conta Azul não encontrado. Faça login novamente.",
       );
     }
 
@@ -212,7 +216,7 @@ export async function getCategorias(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -239,14 +243,14 @@ export async function getDespesas(
   dataVencimentoDe: string,
   dataVencimentoAte: string,
   categorias?: string | (string | number)[],
-  centrosDeCusto?: string | (string | number)[]
+  centrosDeCusto?: string | (string | number)[],
 ): Promise<ContaAzulPaginatedResponse<DespesaReceita>> {
   try {
     const accessToken = await getContaAzulToken();
 
     if (!accessToken) {
       throw new AuthenticationError(
-        "Token da Conta Azul não encontrado. Faça login novamente."
+        "Token da Conta Azul não encontrado. Faça login novamente.",
       );
     }
 
@@ -255,6 +259,7 @@ export async function getDespesas(
       tamanho_pagina: "1000",
       data_vencimento_de: dataVencimentoDe,
       data_vencimento_ate: dataVencimentoAte,
+      ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
     };
 
     if (
@@ -285,7 +290,7 @@ export async function getDespesas(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -314,14 +319,14 @@ export async function getReceitas(
   dataVencimentoDe: string,
   dataVencimentoAte: string,
   categorias?: string | (string | number)[],
-  centrosDeCusto?: string | (string | number)[]
+  centrosDeCusto?: string | (string | number)[],
 ): Promise<ContaAzulPaginatedResponse<DespesaReceita>> {
   try {
     const accessToken = await getContaAzulToken();
 
     if (!accessToken) {
       throw new AuthenticationError(
-        "Token da Conta Azul não encontrado. Faça login novamente."
+        "Token da Conta Azul não encontrado. Faça login novamente.",
       );
     }
 
@@ -330,6 +335,7 @@ export async function getReceitas(
       tamanho_pagina: "1000",
       data_vencimento_de: dataVencimentoDe,
       data_vencimento_ate: dataVencimentoAte,
+      ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
     };
 
     if (
@@ -360,7 +366,7 @@ export async function getReceitas(
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -399,7 +405,7 @@ export async function saveBudget(data: BudgetInput): Promise<void> {
 
       if (existingBudget && existingBudget.id !== data.id) {
         throw new ConflictError(
-          `Já existe um orçamento para o ano ${data.ano}.`
+          `Já existe um orçamento para o ano ${data.ano}.`,
         );
       }
 
@@ -537,7 +543,7 @@ export async function getBudget(): Promise<Orcamento[]> {
  * @returns O orçamento encontrado ou null
  */
 export async function getBudgetByYear(
-  year: number | string
+  year: number | string,
 ): Promise<Orcamento | null> {
   try {
     const budget = await prisma.orcamentos.findFirst({

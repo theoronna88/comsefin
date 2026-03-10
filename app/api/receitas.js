@@ -6,13 +6,14 @@ export async function getReceitas(
   dataVencimentoDe,
   dataVencimentoAte,
   categorias,
-  centrosDeCusto
+  centrosDeCusto,
 ) {
   const queryParams = {
     pagina: "1",
     tamanho_pagina: "1000",
     data_vencimento_de: dataVencimentoDe,
     data_vencimento_ate: dataVencimentoAte,
+    ids_contas_financeiras: IDS_CONTAS_FINANCEIRAS,
   };
   if (categorias && categorias.length > 0) {
     queryParams.ids_categorias = categorias;
@@ -36,7 +37,7 @@ export async function getReceitas(
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
 
   const data = await response.json();
