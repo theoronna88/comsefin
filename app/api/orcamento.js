@@ -57,7 +57,10 @@ export async function saveBudget(data) {
     });
 
     if (!currentBudget) {
-      throw new Error("Orçamento não encontrado ou não pertence ao usuário.");
+      return {
+        success: false,
+        message: "Orçamento não encontrado ou não pertence ao usuário.",
+      };
     }
 
     //O ano só pode ser atualizado se não existir outro orçamento com o mesmo ano para este usuário
@@ -65,7 +68,7 @@ export async function saveBudget(data) {
       where: { ano: Number(data.ano), userId },
     });
     if (existingBudget && existingBudget.id !== data.id) {
-      throw new Error("Orçamento para este ano já existe.");
+      return { success: false, message: "Orçamento para este ano já existe." };
     }
 
     try {
@@ -136,9 +139,12 @@ export async function saveBudget(data) {
         message: error?.message,
         stack: error?.stack,
       });
-      throw new Error("Erro ao atualizar o orçamento.");
+      return {
+        success: false,
+        message: "Erro ao atualizar o orçamento. Tente novamente.",
+      };
     }
-    return;
+    return { success: true };
   }
 
   // Verifica se já existe orçamento para este ano E para este usuário
@@ -149,7 +155,7 @@ export async function saveBudget(data) {
     },
   });
   if (existingBudget) {
-    throw new Error("Orçamento para este ano já existe.");
+    return { success: false, message: "Orçamento para este ano já existe." };
   }
 
   try {
@@ -214,8 +220,13 @@ export async function saveBudget(data) {
       message: error?.message,
       stack: error?.stack,
     });
-    throw new Error("Erro ao criar o orçamento.");
+    return {
+      success: false,
+      message: "Erro ao criar o orçamento. Tente novamente.",
+    };
   }
+
+  return { success: true };
 }
 
 export async function getBudget() {

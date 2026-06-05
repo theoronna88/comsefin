@@ -74,15 +74,26 @@ const FormBudget = ({
       };
 
       try {
-        await saveBudget(data);
-        toast.success("Orçamento salvo com sucesso!");
-        setFormData({});
-        window.location.href = "/user/budget";
-        onClose();
+        // saveBudget retorna { success, message } em vez de lançar erro:
+        // mensagens de Server Action são redigidas em produção pelo Next.js,
+        // então o retorno estruturado é o que faz a mensagem chegar ao usuário.
+        const result = await saveBudget(data);
+
+        if (result?.success) {
+          toast.success("Orçamento salvo com sucesso!");
+          setFormData({});
+          window.location.href = "/user/budget";
+          onClose();
+        } else {
+          toast.error("Erro ao salvar o orçamento.", {
+            description: result?.message || "Tente novamente.",
+          });
+        }
       } catch (error) {
+        // Fallback para erros inesperados (ex.: falha de rede/redirect)
         const errorMessage =
           error instanceof Error ? error.message : "Erro desconhecido";
-        toast.error("Erro ao salvar o orçamento. ", {
+        toast.error("Erro ao salvar o orçamento.", {
           description: errorMessage,
         });
       }
