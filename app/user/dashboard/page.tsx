@@ -149,11 +149,6 @@ export default function Page() {
             g.categorias.map((c) => ({ id: c.id, nome: c.nome })),
           );
           setSelectedDespesasCategories(categoriasAgrupadas);
-
-          console.log(
-            "[Dashboard] Organização carregada do banco:",
-            gruposComCategorias,
-          );
         }
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
@@ -251,8 +246,6 @@ export default function Page() {
       });
       setTotaisDespesas(temp);
       setSearching(false);
-
-      console.log("Budget state after fetch:", budget);
     });
   }
 
@@ -284,7 +277,7 @@ export default function Page() {
                   </CardHeader>
                   <CardContent className="grid gap-6">
                     {/* Seleção de categorias de receita que irão aparecer no gráfico */}
-                    <div className="flex flex-1 flex-col p-6 bg-slate-100 rounded-lg">
+                    <div className="flex flex-1 flex-col p-6 bg-slate-100 rounded-lg w-11/12">
                       <Label className="font-medium mb-4">
                         Categorias de Receita:
                       </Label>
@@ -326,7 +319,7 @@ export default function Page() {
                     </div>
 
                     {/* Seleção de ano e botão de buscar */}
-                    <div className="flex items-end gap-4 p-4 bg-slate-100 rounded-lg">
+                    <div className="flex items-end gap-4 p-4 bg-slate-100 rounded-lg w-11/12">
                       <div className="w-48">
                         <Label className="block text-sm font-medium mb-1">
                           Ano:
@@ -370,20 +363,22 @@ export default function Page() {
                     {/* Espaço para colocar o gráfico de receitas */}
 
                     {/* Gráfico Pie Todas as Categorias para ver % de Receitas */}
-                    <PercentualCategoriasPie
-                      categorias={totaisReceita}
-                      searching={searching}
-                      year={year}
-                      title="Distribuição de Receitas por Categoria"
-                    />
+                    <div className="w-11/12 p-4 bg-slate-100 rounded-lg flex flex-col gap-2">
+                      <PercentualCategoriasPie
+                        categorias={totaisReceita}
+                        searching={searching}
+                        year={year}
+                        title="Distribuição de Receitas por Categoria"
+                      />
 
-                    {/* Gráfico Multibar Ano x Ano */}
-                    <YearVsYearCategory
-                      totaisReceita={totaisReceita}
-                      searching={searching}
-                      year={year}
-                      title="Receitas"
-                    />
+                      {/* Gráfico Multibar Ano x Ano */}
+                      <YearVsYearCategory
+                        totaisReceita={totaisReceita}
+                        searching={searching}
+                        year={year}
+                        title="Receitas"
+                      />
+                    </div>
 
                     {/* Gráfico Receitas ao longo do Ano - Verificar necessidade depois ! */}
 

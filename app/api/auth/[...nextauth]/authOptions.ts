@@ -54,9 +54,6 @@ const getTokenExpirationTime = () => {
   if (envMinutes) {
     const minutes = parseInt(envMinutes, 10);
     if (!isNaN(minutes) && minutes > 0) {
-      console.log(
-        `⚠️  [AUTH] Usando tempo de expiração personalizado: ${minutes} minutos`
-      );
       return minutes * 60 * 1000; // Converte minutos para milissegundos
     }
   }
@@ -130,7 +127,6 @@ export const authOptions = {
 
       // Verifica se o token expirou - força logout
       if (token.accessTokenExpires && Date.now() >= token.accessTokenExpires) {
-        console.log("Token da Conta Azul expirou, forçando logout...");
         return {
           ...token,
           error: "TokenExpiredError",

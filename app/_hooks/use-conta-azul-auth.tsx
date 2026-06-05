@@ -17,7 +17,6 @@ export function useContaAzulAuth() {
     if (isLoggingOut.current) return;
     isLoggingOut.current = true;
 
-    console.log("[useContaAzulAuth] Forçando logout...");
     await signOut({ callbackUrl: "/" });
   }, []);
 
@@ -103,7 +102,6 @@ export function useRequireAuth() {
 
   useEffect(() => {
     if (!isLoading && isTokenExpired()) {
-      console.log("[useRequireAuth] Token expirado, forçando logout...");
       forceLogout();
     }
   }, [isLoading, isTokenExpired, forceLogout]);

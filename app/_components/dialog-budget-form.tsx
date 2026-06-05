@@ -21,10 +21,8 @@ const DialogBudgetForm = ({
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="w-full max-w-4xl h-screen max-h-[90vh] overflow-auto">
-          <DialogTitle>
-            <h3 className="text-2xl font-bold mb-4 text-primary px-16">
-              {isEdit ? "Editar Orçamento" : "Adicionar Orçamento"}
-            </h3>
+          <DialogTitle className="text-2xl font-bold mb-4 text-primary px-16">
+            {isEdit ? "Editar Orçamento" : "Adicionar Orçamento"}
           </DialogTitle>
           <FormBudget
             categorias={categorias}

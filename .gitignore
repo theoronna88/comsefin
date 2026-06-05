@@ -8,6 +8,7 @@
 
 # testing
 /coverage
+.playwright-mcp
 
 # next.js
 /.next/
@@ -38,3 +39,6 @@ next-env.d.ts
 /app/generated/prisma
 
 scripts
+
+# documentação local (não versionada)
+/docs

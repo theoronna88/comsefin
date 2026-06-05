@@ -6,13 +6,17 @@ export async function getReceitas(
   dataVencimentoDe,
   dataVencimentoAte,
   categorias,
-  centrosDeCusto
+  centrosDeCusto,
 ) {
+  const ids_contas_financeiras =
+    process.env.NEXT_PUBLIC_IDS_CONTAS_FINANCEIRAS || "";
+
   const queryParams = {
     pagina: "1",
     tamanho_pagina: "1000",
     data_vencimento_de: dataVencimentoDe,
     data_vencimento_ate: dataVencimentoAte,
+    ids_contas_financeiras: ids_contas_financeiras,
   };
   if (categorias && categorias.length > 0) {
     queryParams.ids_categorias = categorias;
@@ -36,7 +40,7 @@ export async function getReceitas(
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-    }
+    },
   );
 
   const data = await response.json();

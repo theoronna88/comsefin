@@ -56,13 +56,14 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
         ) : (
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square max-h-[400px] w-1/2"
+            className="mx-auto aspect-square max-h-[400px] w-3/4"
           >
             <ResponsiveContainer>
               <PieChart
                 className="[&_.recharts-pie-label-text]:font-bold 
               [&_.recharts-sector]:stroke-white 
               [&_.recharts-sector]:stroke-2
+              
               "
               >
                 <ChartTooltip
@@ -97,7 +98,10 @@ const PieChartCard = ({ searching, chartConfig, title }: PieChartProps) => {
                 </Pie>
                 <ChartLegend
                   content={<ChartLegendContent nameKey="label" />}
-                  className="-translate-y-2 flex-wrap items-start gap-y-2 justify-center"
+                  layout="vertical"
+                  verticalAlign="middle"
+                  align="right"
+                  className="flex-col gap-2 items-start"
                 />
               </PieChart>
             </ResponsiveContainer>

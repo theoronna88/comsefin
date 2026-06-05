@@ -28,7 +28,6 @@ const YearVsYear = ({
   year,
   title,
 }: YearVsYearProps) => {
-  // console.log("YearVsYear - centrosDeCusto: ", centrosDeCusto);
   /*
   const chartDataAtual = centrosDeCusto
     .map((centro) => {
@@ -75,9 +74,6 @@ const YearVsYear = ({
       };
     })
     .filter((item) => item.atual !== 0 && item.anterior !== 0);
-
-  // console.log("chartDataAtual: ", chartDataAtual);
-  // console.log("centrosDeCusto: ", centrosDeCusto);
 
   return (
     <div className="w-3/4 mx-auto">

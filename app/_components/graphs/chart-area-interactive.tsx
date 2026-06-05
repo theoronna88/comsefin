@@ -143,7 +143,6 @@ export function ChartAreaInteractive({
         0
       );
     }
-    // console.log("data array: ", data);
     return data;
   };
 

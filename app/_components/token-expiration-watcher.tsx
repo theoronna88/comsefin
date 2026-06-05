@@ -40,10 +40,6 @@ export function TokenExpirationWatcher({
     if (isRedirecting.current) return;
     isRedirecting.current = true;
 
-    console.log(
-      "[TokenWatcher] Token expirado ou inválido. Redirecionando para login..."
-    );
-
     await signOut({
       callbackUrl: "/",
       redirect: true,
@@ -59,7 +55,6 @@ export function TokenExpirationWatcher({
       session?.error === "RefreshAccessTokenError" ||
       session?.error === "TokenExpiredError"
     ) {
-      console.log("[TokenWatcher] Erro detectado na sessão:", session.error);
       forceLogout();
       return;
     }
@@ -69,8 +64,6 @@ export function TokenExpirationWatcher({
       session?.accessTokenExpires &&
       Date.now() >= session.accessTokenExpires
     ) {
-      console.log("[TokenWatcher] Token expirou baseado no timestamp");
-
       // Tenta atualizar a sessão primeiro
       const updatedSession = await update();
 
@@ -83,7 +76,6 @@ export function TokenExpirationWatcher({
 
     // Verifica se não há token de acesso
     if (!session?.accessToken) {
-      console.log("[TokenWatcher] Sem access token na sessão");
       forceLogout();
       return;
     }
@@ -109,13 +101,11 @@ export function TokenExpirationWatcher({
     if (!isProtectedPage) return;
 
     const handleFocus = () => {
-      console.log("[TokenWatcher] Janela ganhou foco, verificando token...");
       checkTokenValidity();
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        console.log("[TokenWatcher] Aba ficou visível, verificando token...");
         checkTokenValidity();
       }
     };
@@ -132,7 +122,6 @@ export function TokenExpirationWatcher({
   // Monitora mudanças de erro na sessão
   useEffect(() => {
     if (session?.error && isProtectedPage) {
-      console.log("[TokenWatcher] Novo erro detectado:", session.error);
       forceLogout();
     }
   }, [session?.error, isProtectedPage, forceLogout]);

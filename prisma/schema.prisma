@@ -92,7 +92,7 @@ model ItensOrcamento {
 
 model ValoresOrcamento {
   id        String   @id @default(cuid())
-  valor     Decimal  @db.Decimal(10, 2)
+  valor     Decimal  @db.Decimal(15, 2)
   createdAt DateTime @default(now())
 
   orcamentoId String

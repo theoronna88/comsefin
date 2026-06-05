@@ -139,13 +139,10 @@ export function CategoryGroupManager({
   // Função auxiliar para salvar a organização no banco
   const persistirOrganizacao = useCallback(
     async (gruposAtualizados: GrupoDespesa[]) => {
-      console.log("[persistirOrganizacao] Chamado");
-
       // Chama callback do dashboard se disponível
       onGroupsChange?.(gruposAtualizados);
 
       // Sempre persiste no banco (organização é global)
-      console.log("[persistirOrganizacao] Vai persistir no banco");
       setIsPending(true);
 
       const payload = gruposAtualizados.map((grupo) => ({
@@ -153,12 +150,8 @@ export function CategoryGroupManager({
         contaAzulCategoryIds: grupo.categorias.map((cat) => cat.id),
       }));
 
-      console.log("[persistirOrganizacao] Payload a ser enviado:", JSON.stringify(payload));
-
       try {
-        console.log("[persistirOrganizacao] Chamando salvarOrganizacaoCategorias...");
         const result = await salvarOrganizacaoCategorias(payload);
-        console.log("[persistirOrganizacao] Resultado:", result);
         if (result.success) {
           toast.success("Organização salva!");
         } else {
@@ -179,10 +172,7 @@ export function CategoryGroupManager({
       const { active, over } = event;
       setActiveCategoria(null);
 
-      console.log("[handleDragEnd] active:", active.id, "over:", over?.id);
-
       if (!over || active.id === over.id) {
-        console.log("[handleDragEnd] Retornando sem ação - over:", over, "active.id === over.id:", active.id === over?.id);
         return;
       }
 
@@ -224,8 +214,6 @@ export function CategoryGroupManager({
 
       // Atualiza o estado
       setGrupos(novosGrupos);
-
-      console.log("[handleDragEnd] novosGrupos:", JSON.stringify(novosGrupos.map(g => ({ id: g.id, categorias: g.categorias.map(c => c.id) }))));
 
       // Chama a persistência com o estado atualizado (side effect)
       persistirOrganizacao(novosGrupos);

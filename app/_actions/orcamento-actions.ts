@@ -16,11 +16,5 @@ export const fetchBudget = async (year: number) => {
     },
   });
 
-  console.log(
-    "Fetched budget for year",
-    year,
-    ":",
-    JSON.stringify(res, null, 2)
-  );
   return res;
 };

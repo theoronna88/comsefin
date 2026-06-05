@@ -62,11 +62,7 @@ const Budget = () => {
 
     const fetchBudget = async () => {
       getBudget()
-        .then(
-          (
-            data // console.log("Budget data:", data);
-          ) => setBudgets(data)
-        )
+        .then((data) => setBudgets(data))
         .catch((error) => {
           console.error("Error fetching budget:", error);
         });
