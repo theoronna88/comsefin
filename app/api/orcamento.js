@@ -51,23 +51,24 @@ export async function saveBudget(data) {
 
   //Verifica se é atualização ou criação
   if (data.id) {
+    // Verifica se o orçamento pertence ao usuário
+    const currentBudget = await prisma.orcamentos.findFirst({
+      where: { id: data.id },
+    });
+
+    if (!currentBudget) {
+      throw new Error("Orçamento não encontrado ou não pertence ao usuário.");
+    }
+
+    //O ano só pode ser atualizado se não existir outro orçamento com o mesmo ano para este usuário
+    const existingBudget = await prisma.orcamentos.findFirst({
+      where: { ano: Number(data.ano), userId },
+    });
+    if (existingBudget && existingBudget.id !== data.id) {
+      throw new Error("Orçamento para este ano já existe.");
+    }
+
     try {
-      // Verifica se o orçamento pertence ao usuário
-      const currentBudget = await prisma.orcamentos.findFirst({
-        where: { id: data.id },
-      });
-
-      if (!currentBudget) {
-        throw new Error("Orçamento não encontrado ou não pertence ao usuário.");
-      }
-
-      //O ano só pode ser atualizado se não existir outro orçamento com o mesmo ano para este usuário
-      const existingBudget = await prisma.orcamentos.findFirst({
-        where: { ano: Number(data.ano), userId },
-      });
-      if (existingBudget && existingBudget.id !== data.id) {
-        throw new Error("Orçamento para este ano já existe.");
-      }
       //Atualiza o orçamento existente
       await prisma.orcamentos.update({
         where: { id: data.id },
@@ -122,7 +123,19 @@ export async function saveBudget(data) {
         }
       }
     } catch (error) {
-      console.error("Erro ao atualizar o orçamento:", error);
+      // Log estruturado para rastreio no servidor (persistente na VPS).
+      // `code` traz o erro do Prisma (ex.: P2000 = valor longo/numérico demais
+      // para a coluna; P2002 = violação de unicidade).
+      console.error("[saveBudget][atualização] Erro ao atualizar orçamento:", {
+        orcamentoId: data.id,
+        userId,
+        ano: data.ano,
+        totalCategorias: data.categorias?.length ?? 0,
+        name: error?.name,
+        code: error?.code,
+        message: error?.message,
+        stack: error?.stack,
+      });
       throw new Error("Erro ao atualizar o orçamento.");
     }
     return;
@@ -139,51 +152,69 @@ export async function saveBudget(data) {
     throw new Error("Orçamento para este ano já existe.");
   }
 
-  //Cria um novo orçamento para o ano selecionado, atrelado ao usuário
-  const rOrcamento = await prisma.orcamentos.create({
-    data: {
-      ano: Number(data.ano),
-      userId, // Atrelando ao usuário do Conta Azul
-    },
-  });
-
-  //Verifica se os itens do orçamento já existem e cria novos itens
-  for (const categoria of data.categorias) {
-    // Usar categoriaId como código único
-    const catCodigo = categoria.categoriaId;
-    const catNome = categoria.nome || categoria.categoriaId;
-
-    const existingItem = await prisma.itensOrcamento.findFirst({
-      where: {
-        codigo: catCodigo,
+  try {
+    //Cria um novo orçamento para o ano selecionado, atrelado ao usuário
+    const rOrcamento = await prisma.orcamentos.create({
+      data: {
+        ano: Number(data.ano),
+        userId, // Atrelando ao usuário do Conta Azul
       },
     });
 
-    let item = null;
-    if (!existingItem) {
-      item = await prisma.itensOrcamento.create({
-        data: {
-          descricao: catNome,
+    //Verifica se os itens do orçamento já existem e cria novos itens
+    for (const categoria of data.categorias) {
+      // Usar categoriaId como código único
+      const catCodigo = categoria.categoriaId;
+      const catNome = categoria.nome || categoria.categoriaId;
+
+      const existingItem = await prisma.itensOrcamento.findFirst({
+        where: {
           codigo: catCodigo,
-          status: true,
         },
       });
-    } else {
-      // Atualiza o nome/descrição caso tenha mudado
-      await prisma.itensOrcamento.update({
-        where: { id: existingItem.id },
-        data: { descricao: catNome },
+
+      let item = null;
+      if (!existingItem) {
+        item = await prisma.itensOrcamento.create({
+          data: {
+            descricao: catNome,
+            codigo: catCodigo,
+            status: true,
+          },
+        });
+      } else {
+        // Atualiza o nome/descrição caso tenha mudado
+        await prisma.itensOrcamento.update({
+          where: { id: existingItem.id },
+          data: { descricao: catNome },
+        });
+      }
+
+      //Cria Valores do Orçamento
+      await prisma.valoresOrcamento.create({
+        data: {
+          orcamentoId: rOrcamento.id,
+          itemId: existingItem ? existingItem.id : item.id,
+          valor: Number(categoria.valor),
+        },
       });
     }
-
-    //Cria Valores do Orçamento
-    await prisma.valoresOrcamento.create({
-      data: {
-        orcamentoId: rOrcamento.id,
-        itemId: existingItem ? existingItem.id : item.id,
-        valor: Number(categoria.valor),
-      },
+  } catch (error) {
+    // Log estruturado para rastreio no servidor (persistente na VPS).
+    // Em produção o Next.js redige a mensagem enviada ao cliente, então é
+    // este log no servidor que permite diagnosticar a causa real.
+    // `code` traz o erro do Prisma (ex.: P2000 = valor longo/numérico demais
+    // para a coluna; P2002 = violação de unicidade).
+    console.error("[saveBudget][criação] Erro ao criar orçamento:", {
+      userId,
+      ano: data.ano,
+      totalCategorias: data.categorias?.length ?? 0,
+      name: error?.name,
+      code: error?.code,
+      message: error?.message,
+      stack: error?.stack,
     });
+    throw new Error("Erro ao criar o orçamento.");
   }
 }
 
