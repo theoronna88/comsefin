@@ -83,7 +83,6 @@ export async function getToken(
         `Falha ao obter token: ${response.status} - ${response.statusText}`,
       );
     }
-    console.log("[getToken] Resposta do token:", resultText);
     return JSON.parse(resultText) as TokenResponse;
   } catch (error) {
     if (error instanceof AppError) throw error;

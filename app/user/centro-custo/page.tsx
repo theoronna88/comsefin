@@ -20,7 +20,7 @@ const CentrodeCustoPage = () => {
           setListCentrodeCusto(res.itens);
         }
       } catch (err) {
-        console.log(err);
+        console.error("Erro ao buscar centros de custo:", err);
         toast.error("Erro ao buscar centros de custo");
       }
     };

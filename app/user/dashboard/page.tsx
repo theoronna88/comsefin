@@ -149,11 +149,6 @@ export default function Page() {
             g.categorias.map((c) => ({ id: c.id, nome: c.nome })),
           );
           setSelectedDespesasCategories(categoriasAgrupadas);
-
-          console.log(
-            "[Dashboard] Organização carregada do banco:",
-            gruposComCategorias,
-          );
         }
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);
@@ -251,8 +246,6 @@ export default function Page() {
       });
       setTotaisDespesas(temp);
       setSearching(false);
-
-      console.log("Budget state after fetch:", budget);
     });
   }
 

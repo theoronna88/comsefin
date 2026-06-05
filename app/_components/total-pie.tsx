@@ -42,7 +42,6 @@ export function TotalPieExercicio({
     return acc;
   }, {} as Record<string, { label: string; color: string; value: number }>);
 
-  // console.log("Sections - chartConfig: ", chartConfig);
   return (
     <>
       {" "}
